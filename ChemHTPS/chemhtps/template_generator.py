@@ -71,7 +71,7 @@ def runmenu(menu, menu_list):
 
         keypress = menu.getch()
 
-        if ord('1') <= keypress <= ord(str(length - 2)):
+        if ord('1') <= keypress <= int((length-2)/10)*10 + ord(str((length - 2)%10)):
             pos = keypress - ord('0') + 1
         elif keypress == curses.KEY_DOWN:
             if pos < length - 1:

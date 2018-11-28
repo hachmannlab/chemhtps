@@ -316,8 +316,9 @@ def get_fused_mol_c(smiles1,smiles2,rules):
                     lib_can_nRa.append(str(can_mol_combi))
     lib_can_c=[]
     for item in lib_can:
-        lib_can_c.append([item[0][:-2],item[1],smiles1[1]+':'+smiles2[1]])
+        lib_can_c.append([item[0],item[1],smiles1[1]+':'+smiles2[1]])
             
+    
     return lib_can_c
         
 def get_fused(smiles1,smiles2):
@@ -423,14 +424,10 @@ def if_add(mol,mol_wt,rules,code,c_type='l'):
     mol_wt=mol.OBMol.GetMolWt()
     #print mol,'after'
 
-    for item in rules[0]:
-        if item not in code:
-            #print code,rules[0]
-            return False
-    # if code in rules[0]:
+    if code in rules[0]:
         
-    #     #print 'code',rules[3]
-    #     return False
+        #print 'code',rules[3]
+        return False
 
     # Calculating no.of rings
     bonds = mol.OBMol.NumBonds()
@@ -490,7 +487,7 @@ def if_add(mol,mol_wt,rules,code,c_type='l'):
     if isinstance(rules[10],list):
         for item in rules[10]:
             no_at=0
-            if item[0]=='C' or item[0]=='S' or item[0]=='N' or item[0]=='O' or item[0]=='c' or item[0]=='s' or item[0]=='n' or item[0]=='o':
+            if item[0]=='C'or'S'or'N'or'O'or'c'or's'or'n'or'o':
                 no_at=get_num_struc(mol,item[0].lower())
                 no_at=no_at+get_num_struc(mol,item[0].upper())
             else:
@@ -507,13 +504,6 @@ def if_add(mol,mol_wt,rules,code,c_type='l'):
         if not passes_all_rules(descriptors):
             #print "hello"
             return False
-
-    if rules[14]!='None':
-        for item in rules[14]:
-            
-            no_occ=get_num_struc(mol,item)
-            if no_occ>0 :
-                return False            
 
     return True
     
@@ -536,7 +526,7 @@ def create_link_c(smiles1,smiles2,rules):
             mol_wt=str(int(mol_combi.OBMol.GetMolWt()))
             code=smiles1[1]+'-'+smiles2[1]
             if if_add(mol_combi,mol_wt,rules,code)==True:
-                library_full.append([str(can_mol_combi)[:-2],mol_wt,code])
+                library_full.append([str(can_mol_combi),mol_wt,code])
     return library_full
     
 

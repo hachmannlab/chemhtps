@@ -43,7 +43,6 @@ import sys
 import os
 import time
 import argparse
-import ConfigParser
 
 from misc import (banner,
                   format_invoked_opts,
@@ -61,6 +60,67 @@ from db_feeder import populate_db
 from job_generator import (generate_jobs,
                            prioritize_pool)
 from job_feeder import feed_jobs
+from feeder_options import feed_options
+
+###################################################################################################
+# Necessary Functions:
+
+
+def config_read(config):
+    """
+        Reads options from the config file
+        Based on options following the format
+        Option_name = The option
+
+        :param str config: The path of the config file
+        :return config_opts: The options read from the config file
+        :rtype: dict
+    """
+    opt_rflag = 1
+
+    config_opts = {}
+    with open(config, 'r') as config:
+        count = 0
+	while 1:
+            line = config.readline()
+            if not line: break
+	    if line[0:2] == '@@': 
+		opt_rflag = 0 
+		continue
+	    if line == '\n': continue
+	    words = line.split(' = ')
+            if opt_rflag == 1:
+                if len(words) > 2:
+                    sys.exit('Bad option in config file')
+	        if len(words) == 2:
+                	config_opts[words[0]] = words[1].rstrip('\n')
+	    if len(words) == 1 and line[1] != '@':
+		count += 1
+		config_opts['run'+str(count)] = words[0][1:].rstrip('\n')
+		opt_rflag = 1
+        config.close()
+
+    #print config_opts
+
+    return config_opts
+
+
+
+def config_log(project_name, logfile):
+    # This part reads options from a .config file if your in the project directory
+    cwd = os.getcwd()
+    if cwd[-len(project_name):] == project_name:
+        tmp_str = 'cat ' + project_name + '.config >> ' + logfile.name 
+    	os.system(tmp_str)
+    
+    with open(project_name + '.config','r') as config:
+	for line in config:
+	    print line.rstrip()
+
+    tmp_str = "------------------------------------------------------------------------------ "
+    print tmp_str
+    logfile.write(tmp_str + '\n')
+	
 
 
 ###################################################################################################
@@ -72,75 +132,82 @@ def main(args, commline_list):
         :param object args: The arguments passed from argparse
         :param list commline_list: What was typed at the command line to execute the program
     """
-    time_start = time.time()
     logfile = open(args.logfile,'a',0)
     error_file = open(args.error_file,'a',0)
+
+    time_start = time.time()
 
     banner_list = banner(PROGRAM_NAME, PROGRAM_VERSION, REVISION_DATE, AUTHORS, CONTRIBUTORS, DESCRIPTION)
     for line in banner_list:
         print line
         logfile.write(line + '\n')
 
+    try:
+        user_name = config_opts['user_name']
+    except:
+        pass
+    if args.feedjobs_remote:
+        feed_jobs(args.project_name, user_name, config_opts)
 
     fopts_list = format_invoked_opts(args,commline_list)
     for line in fopts_list:
         print line
         logfile.write(line + '\n')
-
-    # TODO this seems a less than elegant solution, but it should work for now
-    # This part reads options from a .config file if your in the project directory
-    cwd = os.getcwd()
-    if cwd[-len(args.project_name):] == args.project_name:
-        config = ConfigParser.SafeConfigParser()
-        config.read(args.project_name + '.config')
-        try:
-            user_name = config.get('MAIN', 'user_name')
-        except NoOptionError:
-            sys.exit("The config file has no user_name option.")
-        except NoSectionError:
-            sys.exit("The config file has no MAIN section.")
-        try:
-            scratch_path = config.get('MAIN', 'scratch_path')
-        except NoOptionError:
-            sys.exit("The config file has no scratch_path option.")
-        except NoSectionError:
-            sys.exit("The config file has no MAIN section.")
-
-
     tmp_str = "------------------------------------------------------------------------------ "
     print tmp_str
     logfile.write(tmp_str + '\n')
+    
+    print "config options"
+    logfile.write("config options\n")
+    config_log(args.project_name, logfile)
 
 
     if args.setup_project:
 # TODO: write test that args.project_name exists
         setup_project(args.project_name)
 
+
     if args.generatelib:
         generate_structurelib()
         populate_db("moleculegraph")
-        generate_geometries(args.project_name)
+        generate_geometries(args.project_name,config_opts)
         populate_db("moleculegeom")
+        logfile.write("config file after library_generator:\n")
+        print "------------------------------------"
+	print "config file after library_generator:"
+        print "------------------------------------\n"
+        config_log(args.project_name, logfile)
 
 # TODO: we may want to put a db-based bookkeeping step in here                
 
     if args.generatejobs:
-        generate_jobs()
-
+        generate_jobs(args.project_name,config_opts)
+        logfile.write("config file after job_generator:\n")
+        print "--------------------------------"
+	print "config file after job_generator:"
+        print "--------------------------------\n"
+        config_log(args.project_name, logfile)
+    
     if args.prioritizepool:
-        prioritize_pool()
+        prioritize_pool(config_opts)
 
-    if args.feedjobs:
-        tmp_str = 'sbatch job_templates/' + args.project_name + 'feedjobs.sh'
-        os.system(tmp_str)
-    if args.feedjobs_local:
-        feed_jobs(args.project_name, user_name, scratch_path)
-
-# TODO: add parser function
-
-    tmp_str = "------------------------------------------------------------------------------ "
-    print tmp_str
-    logfile.write(tmp_str + '\n')
+    try:
+        user_name = config_opts['user_name']
+    except:
+        pass
+    if args.feedjobs and not args.feedjobs_remote:
+	feed_options(args.project_name,config_opts)
+        logfile.write("config file after feed_options:\n")
+        print "-------------------------------"
+	print "config file after feed_options:"
+        print "-------------------------------\n"
+        config_log(args.project_name, logfile)
+	if config_opts['feed_local'] == 'FALSE':
+	    tmp_str = 'sbatch job_templates/' + args.project_name + '_feedjobs.sh'
+            os.system(tmp_str)
+        elif config_opts['feed_local'] == 'TRUE':
+            feed_jobs(args.project_name, user_name, config_opts)
+    
 
     tmp_str = tot_exec_time_str(time_start) + "\n" + std_datetime_str()
     print tmp_str  + '\n\n\n'
@@ -161,27 +228,31 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(usage=usage_str)
 
     defaults = {'project_name':None, 'setup':False, 'generatelib':False, 'generatejobs':False, 'prioritize':False,
-                'run':False, 'run_local':False, 'log':'ChemHTPS.log', 'err':'ChemHTPS.err', 'print':2}
+                'feedjobs':False, 'feedjobs_remote':False, 'job_sched':'SLURM',  'log':'ChemHTPS.log', 'err':'ChemHTPS.err', 'print':3}
 
-    # tests for a config file
     cwd = os.getcwd()
     dirlist = os.listdir(cwd)
-    cfg = []
     for entry in dirlist:
         if '.config' in entry:
-            cfg = entry
-    config = ConfigParser.SafeConfigParser()
-    no_config = True
-    if config.read(cfg):
+            config = entry
+    try:
+        config_opts = config_read(config)
         no_config = False
-        try:
-            defaults['project_name'] = config.get('MAIN', 'project_name')
-        except NoOptionError:
-            sys.exit("The config file has no project_name option.")
-        except NoSectionError:
-            sys.exit("The config file has no MAIN section.")
-
-
+        if 'project_name' in config_opts:
+            defaults['project_name'] = config_opts['project_name']
+	count = 0
+	if 'log_file' in config_opts:
+	    defaults['log'] = config_opts['log_file']
+	if 'error_file' in config_opts:
+	    defaults['err'] = config_opts['error_file']
+	while count <= 5:
+	    count += 1
+	    if 'run'+str(count) in config_opts:
+	   	defaults[config_opts['run'+str(count)]] = 'True'
+    except NameError:
+        no_config = True
+		
+	    
     # TODO there is still more to be done here
 
     parser.add_argument('--version',
@@ -220,13 +291,13 @@ if __name__ == "__main__":
     parser.add_argument('--feedjobs',
                         dest='feedjobs',
                         action='store_true',
-                        default=defaults['run'],
+                        default=defaults['feedjobs'],
                         help='Runs the jobs from on the cluster [default: %(default)s]')
 
-    parser.add_argument('--feedjobs_local',
-                        dest='feedjobs_local',
+    parser.add_argument('--feedjobs_remote',
+                        dest='feedjobs_remote',
                         action='store_true',
-                        default=defaults['run_local'],
+                        default=defaults['feedjobs_remote'],
                         help='Runs the jobs locally [default: %(default)s]')
 
 

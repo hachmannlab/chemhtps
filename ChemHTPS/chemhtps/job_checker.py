@@ -25,6 +25,7 @@ _DESCRIPTION = "This module checks for completed jobs and attempts error handlin
 
 import os
 import sys
+import glob
 import subprocess
 import fnmatch
 import datetime
@@ -45,20 +46,25 @@ class Job(object):
         :param bool is_running: A boolean that is true if the job is running and False if its not
         :param str rm_path: a path for removal, if populated can be deleted because the job has been tarred
     """
+# initializes the important parameters for each job_object
 
-    def __init__(self, name, cluster, sbatch):
+
+    def __init__(self, name, cluster):
         """
             Initialize a Job object.
         """
         self.name = name
         self.cluster = cluster
         self.path = os.getcwd()
-        self.slurm_id = subprocess.check_output(sbatch, shell=True).split()[3]
+        self.slurm_id = ''
         self.is_running = True
         self.rm_path = ''
         self.slurm_last_line = ''
         self.out_last_line = ''
+        self.out_3last_line = ''
 
+    def slurm_submit_id(self,sbatch):
+	self.slurm_id = subprocess.check_output(sbatch, shell=True).split()[3]
 
     def check_status(self, user_name):
         """
@@ -116,13 +122,19 @@ class Job(object):
         """
             Get the last line of the slurm output
         """
-        self.slurm_last_line = self.nth_line(1, 'slurm_orca.out')
-            
+        self.slurm_last_line = self.nth_line(1, 'slurm.out')
+	         
     def out_last(self):
         """
             Get the last line of the quantum software output
         """
         self.out_last_line = self.nth_line(1, self.name + ".out")
+    
+    def out_3last(self):
+        """
+            Get the last line of the quantum software output
+        """
+        self.out_3last_line = self.nth_line(3, self.name + ".out")
 
     def tar_job_unit(self, tbz='.tbz'):
         """
@@ -132,10 +144,10 @@ class Job(object):
         """
         cwd = os.getcwd()
         os.chdir(self.path.rsplit('/', 1)[0])
-        tmp = "tar -cjf " + self.name + tbz + " " + self.name
+        tmp = "tar -cjf " + self.name + tbz + " " + self.name.split('.')[-1]
         os.system(tmp)
         self.rm_path = self.path
-        self.path = self.path + tbz
+        self.path = self.path.rsplit('/', 1)[0] + '/' + self.name + tbz
         os.chdir(cwd)
 
     def move_job(self, dest_path):
@@ -179,31 +191,76 @@ def check_jobs(user_name, scratch, archive, lost, job_list):
         if not job.check_status(user_name):
             job.slurm_last()
             job.out_last()
-            if job.slurm_last_line == "All Done!" and "TOTAL RUN TIME:" in job.out_last_line:
+	    job.out_3last()
+            if job.slurm_last_line == "All Done!" and "TOTAL RUN TIME:" in job.out_last_line: #orca success
                 job.tar_job_unit()
                 job.move_job(archive)
                 job.rm_job()
                 now = datetime.datetime.now()
                 logfile.write('Job ' + job.name + ' has finished and been moved to the archive: ' + str(now) + '\n')
-            elif job.slurm_last_line == "All Done!" and job.out_last_line == "ABORTING THE RUN":
+            elif job.slurm_last_line == "All Done!" and "cleanup process" in job.out_last_line: #qchem success
+                job.tar_job_unit()
+                job.move_job(archive)
+                job.rm_job()
+                now = datetime.datetime.now()
+                logfile.write('Job ' + job.name + ' has finished and been moved to the archive: ' + str(now) + '\n')
+            elif job.slurm_last_line == "All Done!" and job.out_last_line == "ABORTING THE RUN": #orca failure 
                 job.tar_job_unit('.coordoff.tbz')
                 job.move_job(lost)
                 job.rm_job()
                 now = datetime.datetime.now()
                 logfile.write('Job ' + job.name + ' has not finished due to the geometry being very off, moved to lost+found: ' + str(now) + '\n')
-            elif job.slurm_last_line == "All Done!" and job.out_last_line == "No atoms to convert in Cartesian2Internal":
+            elif job.slurm_last_line == "All Done!" and job.out_last_line == "No atoms to convert in Cartesian2Internal": #orca geometry failure
                 job.tar_job_unit('.missingcoord.tbz')
                 job.move_job(lost)
                 job.rm_job()
                 now = datetime.datetime.now()
                 logfile.write('Job ' + job.name + ' has not finished due to a missing coordinate in the geometry, moved to lost+found: ' + str(now) + '\n')
-            elif job.slurm_last_line == "slurmstepd: Exceeded step memory limit at some point.":
+            elif job.slurm_last_line == "All Done!" and "interrupt SIGx" in job.out_last_line:
+		if "Could not find $molecule section" in job.out_3last_line: #qchem geometry failure
+                    job.tar_job_unit('.missingmolsec.tbz')
+                    job.move_job(lost)
+                    job.rm_job()
+                    now = datetime.datetime.now()
+                    logfile.write('Job ' + job.name + ' has not finished due to a missing molecule section in the geometry, moved to lost+found: ' + str(now) + '\n')
+            	elif "Basis not supported for the above atom." in job.out_3last_line: #qchem basis failure
+                    job.tar_job_unit('.basiserror.tbz')
+                    job.move_job(lost)
+                    job.rm_job()
+                    now = datetime.datetime.now()
+                    logfile.write('Job ' + job.name + ' has not finished due to a basis set error, moved to lost+found: ' + str(now) + '\n')
+            	elif "Should be exactly two non-comment tokens on charge and multiplicity line" in job.out_3last_line: #qchem basis failure
+                    job.tar_job_unit('.missingmol.tbz')
+                    job.move_job(lost)
+                    job.rm_job()
+                    now = datetime.datetime.now()
+                    logfile.write('Job ' + job.name + ' has not finished due to missing molecule, moved to lost+found: ' + str(now) + '\n')
+            	elif "Invalid charge/multiplicity combination in MoleculeInput" in job.out_3last_line: #qchem basis failure
+                    job.tar_job_unit('.spinchargeerr.tbz')
+                    job.move_job(lost)
+                    job.rm_job()
+                    now = datetime.datetime.now()
+                    logfile.write('Job ' + job.name + ' has not finished due to a mismatch between charge and spin multiplicity, moved to lost+found: ' + str(now) + '\n')
+            	else:
+            	    job.tar_job_unit('.bad.tbz')
+            	    job.move_job(lost)
+            	    job.rm_job()
+            	    now = datetime.datetime.now()
+            	    logfile.write('Job ' + job.name + ' has not finished for unknown reason: ' + str(now) + '\n')
+            	    error_file.write('Job ' + job.name + ' has not finished due to a previously unknown issue: ' + str(now) + '\n')
+            elif job.slurm_last_line == "All Done!" and "net_send: could not write to" in job.out_last_line : #qchem parallel failure
+                job.tar_job_unit('.nodeerror.tbz')
+                job.move_job(lost)
+                job.rm_job()
+                now = datetime.datetime.now()
+                logfile.write('Job ' + job.name + ' has not finished due to a problem in parallel communication, moved to lost+found: ' + str(now) + '\n')
+            elif job.slurm_last_line == "slurmstepd: Exceeded step memory limit at some point." and job.name.split('.')[0] == 'ORCA': #memory limit failure
                 restarts = cwd + '/jobpool/priority/restarts'
                 chk_mkdir(restarts)
                 job.move_job(restarts)
                 now = datetime.datetime.now()
                 logfile.write('Job ' + job.name + ' crashed due to a memory issue, and has been restarted: ' + str(now) + '\n')
-            elif "DUE TO TIME LIMIT" in job.slurm_last_line:
+            elif "DUE TO TIME LIMIT" in job.slurm_last_line and job.name.split('.')[0] == 'ORCA': #time limit failure
                 job.time_limit_restart()
                 restarts = cwd + '/jobpool/priority/restarts'
                 chk_mkdir(restarts)

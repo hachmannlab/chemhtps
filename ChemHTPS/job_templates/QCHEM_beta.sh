@@ -1,16 +1,17 @@
-#!/usr/bin/env bash
+#!/bin/sh
 #SBATCH --clusters=chemistry
 #SBATCH --partition=beta --qos=beta
-#SBATCH --account=hachmann 
-##SBATCH --time=0
+#SBATCH --account=hachmann
+#SBATCH --time=72:00:00
 #SBATCH --nodes=1
-#SBATCH --job-name="feedjobs"
-#SBATCH --output=feedjobs.out
+#SBATCH --ntasks=1
+#SBATCH --job-name="qchemtest"
+#SBATCH --output=slurm.out
 
 # ====================================================
-# For 16-core nodes
+# For 24-core nodes
 # ====================================================
-#SBATCH --constraint=CPU-E5-2630v3
+#SBATCH --constraint=CPU-E5-2650v4
 #SBATCH --tasks-per-node=1
 #SBATCH --mem=64000
 
@@ -23,12 +24,29 @@ echo "Number of Nodes      = "$SLURM_JOB_NUM_NODES
 echo "Tasks per Node       = "$SLURM_TASKS_PER_NODE
 echo "Memory per Node      = "$SLURM_MEM_PER_NODE
 
+#export INFILE=inp_ut.inp
+#export OUTFILE=QC.out
+infile here
+outfile here
+
+module load qchem/4.4
+module list
 ulimit -s unlimited
-module load python
+#
+echo "SLURMTMPDIR="$SLURMTMPDIR
 
+export QCLOCALSCR=$SLURMTMPDIR
 
+echo "SLURM_JOB_NODELIST"=$SLURM_JOB_NODELIST
+echo "SLURM_NNODES"=$SLURM_NNODES
 
-echo "Launch job"
-srun $SLURM_SUBMIT_DIR/../chemhtps.py --feedjobs_remote
+export PBS_NODEFILE=nodelist.$$
+srun --nodes=${SLURM_NNODES} bash -c 'hostname' | sort > $PBS_NODEFILE
+cat $PBS_NODEFILE
+
+NPROCS=`cat $PBS_NODEFILE | wc -l`
+echo "NPROCS="$NPROCS
+
+qchem -pbs -np $NPROCS $INFILE $OUTFILE
 #
 echo "All Done!"

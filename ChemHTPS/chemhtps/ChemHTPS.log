@@ -1,0 +1,33 @@
+============================================================================== 
+ChemHTPS v0.0.1 (2015-06-24)
+Johannes Hachmann (hachmann@buffalo.edu) and William Evangelista (wevangel@buffalo.edu)
+============================================================================== 
+Tue Nov 27 17:45:23 2018
+
+ChemHTPS is a virtual high-throughput screening program suite for the chemical and materials sciences.
+With contributions from:
+   Mohammad Atif Faiz Afzal (library generation)
+
+Invoked command line: 
+chemhtps.py --setup_project --project_name test_proj
+
+Invoked options: 
+   setup_project: True
+   project_name: test_proj
+   feedjobs: False
+   generatejobs: False
+   prioritizepool: False
+   error_file: ChemHTPS.err
+   print_level: 3
+   feedjobs_remote: False
+   generatelib: False
+   logfile: ChemHTPS.log
+
+------------------------------------------------------------------------------ 
+config options
+------------------------------------------------------------------------------ 
+Total execution time: 0.36s (0h 0m 0.36s)
+2018-11-27 17:45:23
+
+
+

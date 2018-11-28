@@ -53,7 +53,7 @@ def main(args, commline_list):
     signal.signal(signal.SIGTERM, handler)
 
     # move files from submit directory to the local scratch of the node
-    tmp_str = 'mv ' + submit + '/!(slurm_orca.out) ' + scratch
+    tmp_str = 'mv ' + submit + '/!(slurm.out) ' + scratch
     subprocess.Popen("bash -O extglob -c '" + tmp_str + "'", shell=True).communicate()
     os.chdir(scratch) # change directory to the local scratch
 
@@ -61,7 +61,7 @@ def main(args, commline_list):
     input_file=''
     for inp in fnmatch.filter(os.listdir(scratch), '*.inp'):
         input_file = inp
-    job_name = input_file.rsplit('.')[0]
+    job_name = ".".join(input_file.rsplit('.')[0:-1])
 
     # start the job
     with open(job_name + '.out', 'w', 0) as output:
