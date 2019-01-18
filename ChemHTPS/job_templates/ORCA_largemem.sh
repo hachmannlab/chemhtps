@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-#SBATCH --partition=largemem
+#SBATCH --clusters=ub-hpc
+#SBATCH --partition=largemem --qos=largemem
 #SBATCH --time=72:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --job-name="orcatest"
-#SBATCH --output=slurm_orca.out
+#SBATCH --output=slurm.out
 
 echo "SLURM job ID         = "$SLURM_JOB_ID
 echo "Working Dir          = "$SLURM_SUBMIT_DIR

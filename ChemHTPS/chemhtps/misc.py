@@ -1,24 +1,10 @@
 #!/usr/bin/env python
 
 _MODULE_NAME = "misc"
-_MODULE_VERSION = "v1.0.0"
-_REVISION_DATE = "2015-06-24"
+_MODULE_VERSION = "v0.1.0"
+_REVISION_DATE = "2019-01-10"
 _AUTHORS = "Johannes Hachmann (hachmann@buffalo.edu) and William Evangelista (wevangel@buffalo.edu)"
 _DESCRIPTION = "This is a module for miscellaneous, general purpose functions."
-
-# Version history timeline:
-# v1.0.0 (2015-06-24): adaptation of old lib_jcode
-# v1.0.1 (2016-02-24): added a menu input function
-
-###################################################################################################
-# TASKS OF THIS MODULE:
-# -provides miscellaneous, general purpose functions
-###################################################################################################
-
-###################################################################################################
-# TODO:
-# 
-###################################################################################################
 
 import sys
 import os
@@ -33,7 +19,6 @@ from numpy import fromstring
 
 ###################################################################################################
 
-# TODO: check out similar codes and see if we should add anything
 def banner(SCRIPT_NAME, SCRIPT_VERSION, REVISION_DATE, AUTHORS, CONTRIBUTORS, DESCRIPTION,):
     """
         Banner for python scripts.
@@ -55,8 +40,9 @@ def banner(SCRIPT_NAME, SCRIPT_VERSION, REVISION_DATE, AUTHORS, CONTRIBUTORS, DE
     banner_list.append(time.ctime())
     banner_list.append("")    
     banner_list.append(DESCRIPTION)
-    banner_list.append("With contributions from:")
-    banner_list.append(CONTRIBUTORS)
+    if CONTRIBUTORS != '':
+        banner_list.append("With contributions from:")
+        banner_list.append(CONTRIBUTORS)
     banner_list.append("")
 
     return banner_list
@@ -92,7 +78,6 @@ def wc_dir(dir):
         Returns the number of dirs in a given dir via ls -1d | wc -l. 
         Note that this becomes a rather expensive function call when dir contains many subdirs.
     """    
-#TODO: take care of error for empty dirs
     tmp_str = "ls -1d " + dir + "/*/ | wc -l"
     # this is a quite new python feature and may is only available in 2.6 or so 
     # n = subprocess.getoutput(tmp_str)
@@ -448,7 +433,7 @@ def filelinecount(filename):
         Counts the number of lines in a file.
     """
     f = open(filename, "r+")
-    buf = mmap.mmap(f.fileno(), 0)
+    buf = mmap.mmap(f.fileno())
     lines = 0
     readline = buf.readline
     while readline():

@@ -1,10 +1,10 @@
-#!/bin/sh
-#SBATCH --partition=debug
-#SBATCH --time=01:00:00
+#!/usr/bin/env bash
+#SBATCH --clusters=ub-hpc
+#SBATCH --partition=gpu --qos=gpu
+#SBATCH --time=72:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --job-name="orcatest"
-#SBATCH --output=slurm_orca.out
+#SBATCH --output=slurm.out
 
 echo "SLURM job ID         = "$SLURM_JOB_ID
 echo "Working Dir          = "$SLURM_SUBMIT_DIR

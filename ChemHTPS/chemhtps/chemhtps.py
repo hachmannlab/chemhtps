@@ -1,15 +1,11 @@
 #!/usr/bin/env python
 
 PROGRAM_NAME = "ChemHTPS"
-PROGRAM_VERSION = "v0.0.1"
-REVISION_DATE = "2015-06-24"
-AUTHORS = "Johannes Hachmann (hachmann@buffalo.edu) and William Evangelista (wevangel@buffalo.edu)"
-CONTRIBUTORS = """   Mohammad Atif Faiz Afzal (library generation)"""
+PROGRAM_VERSION = "v0.1.0"
+REVISION_DATE = "2019-01-10"
+AUTHORS = "Johannes Hachmann (hachmann@buffalo.edu), William Evangelista (wevangel@buffalo.edu) and Yudhajit Pal (yudhajit@buffalo.edu)"
+CONTRIBUTORS = """   Mohammad Atif Faiz Afzal and Gaurav Vishwakarma (library generation), and Mojtabah Haghighatlari (documentation)   """
 DESCRIPTION = "ChemHTPS is a virtual high-throughput screening program suite for the chemical and materials sciences."
-
-# Version history timeline (move to CHANGES periodically):
-# v0.0.1 (2015-06-24): complete refactoring of original ChemHTPS code in new package format
-# v0.1.0 (2016-02-24): alpha version
 
 ###################################################################################################
 # TASKS OF THIS MODULE:
@@ -31,19 +27,10 @@ DESCRIPTION = "ChemHTPS is a virtual high-throughput screening program suite for
 # 10) ...
 ###################################################################################################
 
-
-###################################################################################################
-#TODO:
-# -restructure more general functions into modules
-# -put in a printlevel restriction for each print statement 
-###################################################################################################
-
-
 import sys
 import os
 import time
 import argparse
-import ConfigParser
 
 from misc import (banner,
                   format_invoked_opts,
@@ -61,6 +48,67 @@ from db_feeder import populate_db
 from job_generator import (generate_jobs,
                            prioritize_pool)
 from job_feeder import feed_jobs
+#from feeder_options import feed_options
+
+###################################################################################################
+# Necessary Functions:
+
+
+def config_read(config, args):
+    """
+        Reads options from the config file
+        Based on options following the format
+        Option_name = The option
+
+        :param str config: The path of the config file
+        :return config_opts: The options read from the config file
+        :rtype: dict
+    """
+    opt_rflag = 1
+    config_opts = {}
+    with open(config, 'r') as config:
+        while True:
+            line = config.readline()
+            if not line: break
+            line = line.rstrip('\n')
+            words = line.split(' = ')
+            if line == '': continue
+            if '--'+line not in args and len(words) == 1: 
+                if '--feedjobs_remote' in args and line == 'feedjobs':
+                    opt_rflag = 1
+                    continue
+                print ("rejected line: "+line)
+                opt_rflag = 0 
+                continue
+            if opt_rflag == 1:
+                if len(words) > 2:
+                    sys.exit('Bad option in config file')
+            if len(words) == 2:
+                print (line)
+                config_opts[words[0].strip()] = words[1].strip()
+            if len(words) == 1 and '--'+line in args: opt_rflag = 1
+        config.close()
+    return config_opts
+
+
+
+def config_log(project_name, logfile):
+    """
+        Puts the contents of the .config file into the log_file
+    """
+    cwd = os.getcwd()
+    if cwd[-len(project_name):] == project_name:
+        tmp_str = 'cat ' + project_name + '.config >> ' + logfile.name 
+        os.system(tmp_str)
+
+    with open(project_name + '.config','r') as config:
+        for line in config:
+            print (line.rstrip())
+
+    tmp_str = "------------------------------------------------------------------------------ "
+    print (tmp_str)
+    logfile.write(tmp_str + '\n')
+    return 0
 
 
 ###################################################################################################
@@ -72,78 +120,65 @@ def main(args, commline_list):
         :param object args: The arguments passed from argparse
         :param list commline_list: What was typed at the command line to execute the program
     """
+    logfile = open(args.logfile,'a')
+    error_file = open(args.error_file,'a')
+
     time_start = time.time()
-    logfile = open(args.logfile,'a',0)
-    error_file = open(args.error_file,'a',0)
 
     banner_list = banner(PROGRAM_NAME, PROGRAM_VERSION, REVISION_DATE, AUTHORS, CONTRIBUTORS, DESCRIPTION)
     for line in banner_list:
-        print line
+        print (line)
         logfile.write(line + '\n')
 
-
-    fopts_list = format_invoked_opts(args,commline_list)
-    for line in fopts_list:
-        print line
-        logfile.write(line + '\n')
-
-    # TODO this seems a less than elegant solution, but it should work for now
-    # This part reads options from a .config file if your in the project directory
-    cwd = os.getcwd()
-    if cwd[-len(args.project_name):] == args.project_name:
-        config = ConfigParser.SafeConfigParser()
-        config.read(args.project_name + '.config')
+    if args.setup_project == False:
         try:
-            user_name = config.get('MAIN', 'user_name')
-        except NoOptionError:
-            sys.exit("The config file has no user_name option.")
-        except NoSectionError:
-            sys.exit("The config file has no MAIN section.")
-        try:
-            scratch_path = config.get('MAIN', 'scratch_path')
-        except NoOptionError:
-            sys.exit("The config file has no scratch_path option.")
-        except NoSectionError:
-            sys.exit("The config file has no MAIN section.")
+            user_name = config_opts['user_name']
+        except:
+            pass
+        if args.feedjobs_remote:
+            feed_jobs(args.project_name, user_name, config_opts)
 
-
-    tmp_str = "------------------------------------------------------------------------------ "
-    print tmp_str
-    logfile.write(tmp_str + '\n')
-
+        fopts_list = format_invoked_opts(args,commline_list)
+        for line in fopts_list:
+            print (line)
+            logfile.write(line + '\n')
+        tmp_str = "------------------------------------------------------------------------------ "
+        print (tmp_str)
+        logfile.write(tmp_str + '\n')
+  
+        config_log(args.project_name, logfile)
 
     if args.setup_project:
-# TODO: write test that args.project_name exists
         setup_project(args.project_name)
 
     if args.generatelib:
         generate_structurelib()
         populate_db("moleculegraph")
-        generate_geometries(args.project_name)
+        generate_geometries(args.project_name,config_opts)
         populate_db("moleculegeom")
 
-# TODO: we may want to put a db-based bookkeeping step in here                
+    # TODO: we may want to put a db-based bookkeeping step in here                
 
     if args.generatejobs:
-        generate_jobs()
-
+        generate_jobs(args.project_name,config_opts)
+    
     if args.prioritizepool:
-        prioritize_pool()
+        prioritize_pool(config_opts)
 
-    if args.feedjobs:
-        tmp_str = 'sbatch job_templates/' + args.project_name + 'feedjobs.sh'
-        os.system(tmp_str)
-    if args.feedjobs_local:
-        feed_jobs(args.project_name, user_name, scratch_path)
-
-# TODO: add parser function
-
-    tmp_str = "------------------------------------------------------------------------------ "
-    print tmp_str
-    logfile.write(tmp_str + '\n')
-
+    try:
+        user_name = config_opts['user_name']
+    except:
+        pass
+    if args.feedjobs and not args.feedjobs_remote:
+        if config_opts['feed_local'] == 'FALSE':
+            tmp_str = 'sbatch job_templates/' + args.project_name + '_feedjobs.sh'
+            os.system(tmp_str)
+        elif config_opts['feed_local'] == 'TRUE':
+            feed_jobs(args.project_name, user_name, config_opts)
+    
+    print ("Chemhtps Execution Done !")
     tmp_str = tot_exec_time_str(time_start) + "\n" + std_datetime_str()
-    print tmp_str  + '\n\n\n'
+    print (tmp_str  + '\n\n\n')
     logfile.write(tmp_str + '\n\n\n\n')
     logfile.close()    
     error_file.close()
@@ -161,28 +196,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(usage=usage_str)
 
     defaults = {'project_name':None, 'setup':False, 'generatelib':False, 'generatejobs':False, 'prioritize':False,
-                'run':False, 'run_local':False, 'log':'ChemHTPS.log', 'err':'ChemHTPS.err', 'print':2}
-
-    # tests for a config file
-    cwd = os.getcwd()
-    dirlist = os.listdir(cwd)
-    cfg = []
-    for entry in dirlist:
-        if '.config' in entry:
-            cfg = entry
-    config = ConfigParser.SafeConfigParser()
-    no_config = True
-    if config.read(cfg):
-        no_config = False
-        try:
-            defaults['project_name'] = config.get('MAIN', 'project_name')
-        except NoOptionError:
-            sys.exit("The config file has no project_name option.")
-        except NoSectionError:
-            sys.exit("The config file has no MAIN section.")
-
-
-    # TODO there is still more to be done here
+                'feedjobs':False, 'feedjobs_remote':False, 'job_sched':'SLURM',  'log':'ChemHTPS.log', 'err':'ChemHTPS.err', 'print':3}
 
     parser.add_argument('--version',
                         action='version',
@@ -220,13 +234,13 @@ if __name__ == "__main__":
     parser.add_argument('--feedjobs',
                         dest='feedjobs',
                         action='store_true',
-                        default=defaults['run'],
+                        default=defaults['feedjobs'],
                         help='Runs the jobs from on the cluster [default: %(default)s]')
 
-    parser.add_argument('--feedjobs_local',
-                        dest='feedjobs_local',
+    parser.add_argument('--feedjobs_remote',
+                        dest='feedjobs_remote',
                         action='store_true',
-                        default=defaults['run_local'],
+                        default=defaults['feedjobs_remote'],
                         help='Runs the jobs locally [default: %(default)s]')
 
 
@@ -246,8 +260,27 @@ if __name__ == "__main__":
                         default=defaults['print'],
                         help='specifies the print level for on screen and the logfile [default: %(default)s]')
 
-
     args = parser.parse_args(sys.argv[1:])
+    cwd = os.getcwd()
+    dirlist = os.listdir(cwd)
+    # reading the config options by calling config_read function and getting the necessary config options
+    if args.setup_project == False:
+        for entry in dirlist:
+            if '.config' in entry:
+                config = entry
+                try:
+                    config_opts = config_read(config, sys.argv[1:])
+                    print (config_opts)
+                    no_config = False
+                    if 'project_name' in config_opts:
+                        args.project_name = config_opts['project_name']
+                    if 'log_file' in config_opts:
+                        args.logfile = config_opts['log_file']
+                    if 'error_file' in config_opts:
+                        args.errorfile = config_opts['error_file']
+                except NameError:
+                    no_config = True
+
     if cwd.rsplit('/')[-1] != args.project_name and args.setup_project == False:
         sys.exit("ChemHTPS must be run from inside the project directory, or with the setup_project flag.")
     elif args.setup_project == True and args.project_name == None:

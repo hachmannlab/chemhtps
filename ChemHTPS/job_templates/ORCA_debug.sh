@@ -1,18 +1,10 @@
-#!/usr/bin/env bash
-#SBATCH --clusters=chemistry
-#SBATCH --partition=beta
-#SBATCH --account=pi-hachmann
-#SBATCH --time=100:00:00
+#!/bin/sh
+#SBATCH --clusters=ub-hpc
+#SBATCH --partition=debug --qos=debug
+#SBATCH --time=01:00:00
 #SBATCH --nodes=1
-#SBATCH --job-name="orcatest"
-#SBATCH --output=slurm_orca.out
-
-# ====================================================
-# For 16-core nodes
-# ====================================================
-#SBATCH --constraint=CPU-E5-2630v3
-#SBATCH --tasks-per-node=1
-#SBATCH --mem=64000
+#SBATCH --ntasks=1
+#SBATCH --output=slurm.out
 
 echo "SLURM job ID         = "$SLURM_JOB_ID
 echo "Working Dir          = "$SLURM_SUBMIT_DIR
