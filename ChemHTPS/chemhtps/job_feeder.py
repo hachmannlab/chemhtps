@@ -41,7 +41,7 @@ def feed_jobs(project_name, user_name, config_opts):
     logfile = open('job_feeder.log', 'a')
     error_file = open('job_feeder.err', 'a')
 
-    banner_list = banner(_MODULE_NAME, _MODULE_VERSION, _REVISION_DATE, _AUTHORS, _DESCRIPTION)
+    banner_list = banner(_MODULE_NAME, _MODULE_VERSION, _REVISION_DATE, _AUTHORS, '', _DESCRIPTION)
     for line in banner_list:
         print (line)
         logfile.write(line + '\n')
@@ -80,6 +80,7 @@ def feed_jobs(project_name, user_name, config_opts):
     run_dir_counter = 0
     quickcycle_flag = False
     job_class_list = []
+    jobs_length = 0
     job_lines = []
     #job_tracker.log keeps track of all the jobs that at last check hadn't been processed after their submission
     #so this part checks for the spillover jobs from the last run that needs processing
@@ -95,15 +96,24 @@ def feed_jobs(project_name, user_name, config_opts):
             new_job[-1].slurm_id = words[3]
             job_class_list.append(new_job[-1]) 
 
+        tmp_str = "cp job_tracker.log job_tracker_old.log"
+        os.system(tmp_str)
+
         job_class_list = check_jobs(user_name, scratch_path, result_path, problem_path, job_class_list)
-        job_logfile = open('job_tracker.log', 'w')
-        for job in job_class_list:
-            tmp_str = job.name + ',' + job.cluster + ',' + job.path + ',' + job.slurm_id + '\n' 
-            job_logfile.write(tmp_str)
-        job_logfile.close()
+        if jobs_length != len(job_class_list):
+            print ("Jobs running at: " + std_datetime_str())
+            job_logfile = open('job_tracker.log', 'w')
+            jobs_length = len(job_class_list)
+            for job in job_class_list:
+                tmp_str = str(job.name) + ',' + str(job.cluster) + ',' + str(job.path) + ',' + str(job.slurm_id) + '\n' 
+                job_logfile.write(tmp_str)
+                print (tmp_str.strip('\n'))
+                job_logfile.flush()
+            job_logfile.close()
     
 
     if config_opts['job_sched'] == 'SLURM':
+        counter = 0
         while 1:
             queue_list = []  # List of quadruples (cluster name, partition name, total jobs that can be run, job type)
             queue_file = open(queue_file_path, 'r')
@@ -117,8 +127,9 @@ def feed_jobs(project_name, user_name, config_opts):
                     if words[0][0] != '#':
                         queue_list.append(words)
             queue_file.close()
-
             quickcycle_flag = False
+            
+            job_logfile = open('job_tracker.log', 'w')
 
             # Process the queues
             for queue in queue_list:
@@ -158,11 +169,17 @@ def feed_jobs(project_name, user_name, config_opts):
 
                     # Goes through the list of jobs and moves the necessary job files into the corresponding scratch folders
                     for job_source_path in job_source_path_list:
+                        #print (job_source_path)
+                        if len(job_source_path.split('/')) < 2:
+                            continue
+                        if len(job_source_path.split('/')[-2].split('_')) < 6:
+                            continue
                         prog = job_source_path.split('/')[-2].split('_')[1]
                         lib = "".join(job_source_path.split('/')[-2].split('_')[2:-3])
                         job_no = job_source_path.split('/')[-2].split('_')[0] + '_'  + job_source_path.split('/')[-1]
                         j_no = job_source_path.split('/')[-1]
                         slurm_script = project_name + '_' + prog + '_'  + queue[1] + '.sh'
+                        
                         while 1:
                             job_target_path = scratch_path + '/%07d' % run_dir_counter
                             if os.path.isdir(job_target_path):
@@ -173,8 +190,10 @@ def feed_jobs(project_name, user_name, config_opts):
                                 break
                         tmp_str = 'mv ' + job_source_path + ' ' + job_target_path + '/' + job_no
                         os.system(tmp_str)
+                        logfile.write(tmp_str + '\n')
                         tmp_str = 'mv ' + job_target_path + '/' + job_no + '/' + j_no + '.inp' + ' ' + job_target_path + '/' + job_no + '/' + prog + '.' + lib + '.' + job_no + '.inp'
                         os.system(tmp_str)
+                        logfile.write(tmp_str + '\n')
 
                         # Move slurm script into job folder
                         slurm_exists = False
@@ -186,11 +205,9 @@ def feed_jobs(project_name, user_name, config_opts):
                         if slurm_exists:
                             pass
                         else:
-                            tmp_str = 'cp ' + slurm_path + '/' + slurm_script + ' ' + job_target_path + '/' + job_no + '/'
-                            os.system(tmp_str)
-
-                            if slurm_script.split('_')[1] == 'QCHEM':
-                                slurm_file = job_target_path + '/' + job_no + '/' + slurm_script
+                            #tmp_str = 'cp ' + slurm_path + '/' + slurm_script + ' ' + job_target_path + '/' + job_no + '/'
+                            #os.system(tmp_str)
+                            slurm_file = job_target_path + '/' + job_no + '/' + slurm_script
                             with open (slurm_path + '/' + slurm_script,'r') as temp:
                                 slurm_lines = temp.readlines()
                                 for i,line in enumerate(slurm_lines):
@@ -206,35 +223,56 @@ def feed_jobs(project_name, user_name, config_opts):
                         os.system(tmp_str)
 
                         # Submit job to the queue
-                        os.environ["PATH"] += os.pathsep + cwd + '/job_templates'
+                        #os.environ["PATH"] += os.pathsep + cwd + '/job_templates'
                         tmp_str = 'sbatch ' + slurm_script
                         job_class_list.append(prog+ '.' + lib + '.' + job_no)
                         job_class_list[-1]=Job(job_class_list[-1], queue[0])
                         job_class_list[-1].slurm_submit_id(tmp_str)
 
+                        job = job_class_list[-1]
+                        tmp_str = str(job.name) + ',' + str(job.cluster) + ',' + str(job.path) + ',' + str(job.slurm_id) + '\n'
+                        #print (tmp_str)
+                        job_logfile.write(tmp_str)
                         tmp_str = std_datetime_str() + ": Submitting " + prog + '.' + lib + '.' + job_no + ' at '  + job_target_path + '/' + job_no
-                        logfile.write(tmp_str + '\n')
+                        logfile.write(tmp_str + '\n\n')
 
                         os.chdir(cwd)
-
+            job_logfile.flush()
+            job_logfile.close()
             # TODO: Need to process finished jobs still
 
             if quickcycle_flag:
                 time.sleep(60)
                 job_class_list = check_jobs(user_name, scratch_path, result_path, problem_path, job_class_list)
-                job_logfile = open('job_tracker.log', 'w')
-                for job in job_class_list:
-                    tmp_str = job.name + ',' + job.cluster + ',' + job.path + ',' + job.slurm_id + '\n' 
-                    job_logfile.write(tmp_str)
-                job_logfile.close()
+                #counter = counter + 1
+                if jobs_length != len(job_class_list):
+                    print ("Jobs running at: " + std_datetime_str())
+                    jobs_length = len(job_class_list)
+                    tmp_str = "cp job_tracker.log job_tracker_old.log"
+                    os.system(tmp_str)
+                    job_trackfile = open('job_tracker.log', 'w')
+                    for job in job_class_list:
+                        tmp_str = str(job.name) + ',' + str(job.cluster) + ',' + str(job.path) + ',' + str(job.slurm_id) + '\n' 
+                        job_trackfile.write(tmp_str)
+                        print(tmp_str.strip('\n'))
+                        job_trackfile.flush()
+                    job_trackfile.close()
             else:
                 time.sleep(500)
                 job_class_list = check_jobs(user_name, scratch_path, result_path, problem_path, job_class_list)
-                job_logfile = open('job_tracker.log', 'w')
-                for job in job_class_list:
-                    tmp_str = job.name + ',' + job.cluster + ',' + job.path + ',' + job.slurm_id + '\n' 
-                    job_logfile.write(tmp_str)
-                job_logfile.close()
+                #counter = counter + 1
+                if jobs_length != len(job_class_list):
+                    print ("Jobs running at: " + std_datetime_str())
+                    jobs_length = len(job_class_list)
+                    tmp_str = "cp job_tracker.log job_tracker_old.log"
+                    os.system(tmp_str)
+                    job_trackfile = open('job_tracker.log', 'w')
+                    for job in job_class_list:
+                        tmp_str = str(job.name) + ',' + str(job.cluster) + ',' + str(job.path) + ',' + str(job.slurm_id) + '\n' 
+                        job_trackfile.write(tmp_str)
+                        print(tmp_str.strip('\n'))
+                        job_trackfile.flush()
+                    job_trackfile.close()
 
         # end of run section (Note: since we use an endless loop, we will probably never use the regular exit)
     tmp_str = "------------------------------------------------------------------------------ "

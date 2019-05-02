@@ -55,7 +55,7 @@ def generate_geometries(project_name,config_opts):
     for root, directories, filenames in os.walk(cwd + '/screeninglib'):
         for filename in fnmatch.filter(filenames, '*building*'):
             menus[0].insert(0,os.path.join(root, filename))
-        for filename in fnmatch.filter(filenames, '*.smi*'):
+        for filename in fnmatch.filter(filenames, '*smiles.csv*'):
             menus[0].insert(0,os.path.join(root, filename))
         for filename in fnmatch.filter(filenames, '*config*'):
             menus[1].insert(0,os.path.join(root, filename))
@@ -131,6 +131,16 @@ def generate_geometries(project_name,config_opts):
         print ('Error Termination')
         logfile.close()
         error_file.close()
+        temp_str = 'echo \"' + std_datetime_str() + '\n\" >> ' + project_name+'.err'
+        os.system(temp_str)
+        temp_str = 'echo \"Error from --generatelib execution: \n\" >> ' + project_name+'.err'
+        os.system(temp_str)
+        temp_str = 'cat lib_gen.err >> ' + project_name+'.err'
+        os.system(temp_str)
+        temp_str = 'echo \"---------------------------------------------------------------------\n\" >> ' + project_name + '.err'
+        os.system(temp_str)
+        temp_str = 'echo \"\n\n\n\" >> ' + project_name+'.err'
+        os.system(temp_str)
         sys.exit()
 
     # section to record the module config options in the module log file
@@ -161,7 +171,7 @@ def generate_geometries(project_name,config_opts):
     else:
         cores = int(options[2])
         nodes = 0
-        tmp_str = 'mpirun -np ' + options[2] + ' ' + tmp_str
+        tmp_str = 'srun -n ' + options[2] + ' --mpi=pmi2 ' + tmp_str
         slurm_name = 'job_templates/' + project_name + '_generatelib.sh' 
         cluster_info = []
         if options[3] == 'beta':
@@ -181,15 +191,15 @@ def generate_geometries(project_name,config_opts):
             elif line == 'Nodeshere\n':
                 lines[i] = '#SBATCH --nodes=' + str(nodes) + '\n'
             elif line == 'Cpushere\n':
-                lines[i] = '#SBATCH --cpus-per-task='+options[3]+'\n'
+                lines[i] = '#SBATCH --tasks-per-node='+options[2]+'\n'
             elif line == 'Runlinehere\n':
                 lines[i] = tmp_str+'\n'
                 logfile.write(tmp_str +'\n')
         with open('libtmp.sh','w') as slurm_file:
             slurm_file.writelines(lines)
         submit = "sbatch libtmp.sh"
-        LD = "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/user/m27/pkg/openbabel/2.3.2/lib"
-        os.system(LD + ';' + submit)
+        #LD = "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/user/m27/pkg/openbabel/2.3.2/lib"
+        os.system(submit)
         os.remove("libtmp.sh")
     # end of run section
     tmp_str = "------------------------------------------------------------------------------ "

@@ -52,7 +52,7 @@ class Job(object):
             Submits the job and retrieves the jobid for tracking
             :param str sbatch: The sbatch command needed to submit that job
         """
-        self.slurm_id = subprocess.check_output(sbatch, shell=True).split()[3]
+        self.slurm_id = str(subprocess.check_output(sbatch, shell=True).split()[3]).split('\'')[1]
 
     def check_status(self, user_name):
         """
@@ -61,7 +61,7 @@ class Job(object):
             :return self.is_running: The state of the job
             :rtype: bool
         """
-        tmp = "squeue -M " + self.cluster + " -u " + user_name + " | grep " + self.slurm_id + " | wc -l"
+        tmp = "squeue -M " + str(self.cluster) + " -u " + str(user_name) + " | grep " + str(self.slurm_id) + " | wc -l"
         number = int(subprocess.check_output(tmp, shell=True))
         if number == 0:
             self.is_running = False
@@ -94,23 +94,19 @@ class Job(object):
             :return line: The nth line
             :rtype: str
         """
-        with open(self.path + '/' + file_name) as out:
-            out.seek(-1, 2)
-            i = 0
-            while i <= n:
-                if out.read(1) == '\n':
-                    i += 1
-                out.seek(-2,1)
-            out.seek(2,1)
-            tmp = out.readlines()
-            #tmp = filter(lambda a: a != '\n', tmp)
-            line = tmp[0].strip('\n')
-            return line
+        #print (self.path + '/' + file_name)
+        out = open(self.path + '/' + file_name,'r')
+        contents = out.readlines()
+        contents = [x.strip('\n') for x in contents]
+        if len(contents) < n : return 'IndexError'
+        line = contents[-n]
+        return line
 
     def slurm_last(self):
         """
             Get the last line of the slurm output
         """
+        #print (self.slurm_id)
         self.slurm_last_line = self.nth_line(1, 'slurm.out')
          
     def out_last(self):
@@ -180,6 +176,9 @@ def check_jobs(user_name, scratch, archive, lost, job_list):
     rem_list = []
     for job in job_list:
         if not job.check_status(user_name):
+            if not os.path.isfile(job.path+'/slurm.out') or not os.path.isfile(job.path + '/' + job.name + '.out'):
+                rem_list.append(job)
+                continue
             job.slurm_last()
             job.out_last()
             job.out_3last()
@@ -253,7 +252,7 @@ def check_jobs(user_name, scratch, archive, lost, job_list):
                 logfile.write('Job ' + job.name + ' crashed due to a memory issue, and has been restarted: ' + str(now) + '\n')
             elif "DUE TO TIME LIMIT" in job.slurm_last_line and job.name.split('.')[0] == 'ORCA': #time limit failure
                 job.time_limit_restart()
-                restarts = cwd + '/jobpool/priority/restarts'
+                restarts = cwd + '/jobpool/priority/' 
                 chk_mkdir(restarts)
                 job.move_job(restarts)
                 now = datetime.datetime.now()

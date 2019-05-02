@@ -43,7 +43,7 @@ def generate_jobs(project_name, config_opts):
         with  open('job_gen.log','r') as log_read:
             for line in log_read:
                 if 'configfile with options' in line:
-                    jg_no = int(line[:-1].rsplit('.')[-1])    
+                    jg_no = int((line[:-1].rsplit('.')[-1].rsplit(':')[0]))
 
     jg_no += 1
 
@@ -141,11 +141,22 @@ def generate_jobs(project_name, config_opts):
         print ('Error Termination') 
         logfile.close()
         error_file.close()
+        temp_str = 'echo \"' + std_datetime_str() + '\n\" >> ' + project_name+'.err'
+        os.system(temp_str)
+        temp_str = 'echo \"Error from --generatejobs execution: \n\" >> ' + project_name+'.err'
+        os.system(temp_str)
+        temp_str = 'cat job_gen.err >> ' + project_name+'.err'
+        os.system(temp_str)
+        temp_str = 'echo \"---------------------------------------------------------------------\n\" >> ' + project_name + '.err'
+        os.system(temp_str)
+        temp_str = 'echo \"\n\n\n\" >> ' + project_name+'.err'
+        os.system(temp_str)
         sys.exit()
 
     # creating a record of the parameters chosen for the current round of job creation in the log_file
     config_lines = []
     job_gen_lines = []
+    input_lines = []
     r_switch = 0
     logfile.write('configfile with options for job generation with id.no. '+ str(jg_no)  +':\n')
     with open(project_name + '.config', 'r') as config_file:
@@ -156,6 +167,14 @@ def generate_jobs(project_name, config_opts):
         if r_switch == 1: job_gen_lines.append(line)
         if 'generatejobs' in line: r_switch = 1
 
+    job_gen_lines.append('\nInput file contents from ' + config_opts['template'] + '\n')
+ 
+    with open(config_opts['template'], 'r') as input_file:
+        input_lines = input_file.readlines()
+    
+    for line in input_lines:
+        job_gen_lines.append(line)
+    
     logfile.writelines(job_gen_lines)
     for line in job_gen_lines:
         print (line[:-1])
@@ -189,6 +208,7 @@ def generate_jobs(project_name, config_opts):
                         if 'xyzfile' in line:
                             temp[i] = line[:-1] + ' ' + geo + '\n'    
                             xyz_flag = 1
+                            break
                     if xyz_flag == 0:
                         tmp_str = '* xyzfile 0 1 ' + geo + '\n'
                         temp.append(tmp_str)

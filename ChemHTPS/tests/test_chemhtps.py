@@ -41,11 +41,33 @@ def test_setup_project():
     setup_project('testing')
     dir_list = ['/archive', '/db', '/jobpool/short', '/jobpool/priority', '/jobpool/long', '/lost+found',
                 '/screeninglib/geometrylib', '/screeninglib/structurelib', '/job_templates']
-    file_list = ['/testing.config', '/screeninglib/building_blocks.dat', '/screeninglib/generation_rules.dat']
+    file_list = ['/testing.config', '/screeninglib/building_blocks.dat', '/screeninglib/config.dat']
     for dir in dir_list:
         assert True == os.path.isdir('testing' + dir)
     for file in file_list:
         assert True == os.path.isfile('testing' + file)
+
+def test_generate_lib():
+    """
+    A test for the generate_geometries() function in library_generator.py
+    """
+    cwd = os.getcwd()
+    ## Menu for the library generator options
+    inp = []
+    rule = []
+    cluster = ['general-compute', 'beta', 'run locally']
+
+    ## dictionary of menus for checking all available options
+    menus = {0: inp, 1: rule, 2: cluster}
+    
+    for root, directories, filenames in os.walk(cwd + '../chemlg/chemlg/templates'):
+        for filename in fnmatch.filter(filenames, '*building*'):
+            menus[0].insert(0,os.path.join(root, filename))
+        for filename in fnmatch.filter(filenames, '*smiles.csv*'):
+            menus[0].insert(0,os.path.join(root, filename))
+        for filename in fnmatch.filter(filenames, '*config*'):
+            menus[1].insert(0,os.path.join(root, filename))
+    print (menus)
 
 
 def test_generate_jobs():
@@ -69,6 +91,19 @@ def test_generate_jobs():
     assert True == os.path.isfile('testing/jobpool/short/testing/testing.xyz')
     assert True == os.path.isfile('testing/jobpool/short/testing/testing.inp')
     assert True == os.path.isfile('testing/screeninglib/geometrylib/testing.xyz')
+
+
+def test_check_jobs()
+    """
+    A test of the nth_line() function in job_checker.py with n=1
+    """
+    cwd = os.getcwd()
+    out = open(cwd + '../chemlg/chemlg/templates/config.dat', 'r')
+    contents = out.readlines()
+    contents = [x.strip('\n') for x in contents]
+    if len(contents) < 1 : return 'IndexError'
+    line = contents[-1]
+    assert line == 'Library name                    :: new_library_'
 
 
 def test_wrap_up():

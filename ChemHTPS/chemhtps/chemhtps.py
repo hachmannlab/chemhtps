@@ -48,7 +48,6 @@ from db_feeder import populate_db
 from job_generator import (generate_jobs,
                            prioritize_pool)
 from job_feeder import feed_jobs
-#from feeder_options import feed_options
 
 ###################################################################################################
 # Necessary Functions:
@@ -83,9 +82,9 @@ def config_read(config, args):
             if opt_rflag == 1:
                 if len(words) > 2:
                     sys.exit('Bad option in config file')
-            if len(words) == 2:
-                print (line)
-                config_opts[words[0].strip()] = words[1].strip()
+                if len(words) == 2:
+                    print (line)
+                    config_opts[words[0].strip()] = words[1].strip()
             if len(words) == 1 and '--'+line in args: opt_rflag = 1
         config.close()
     return config_opts
@@ -98,12 +97,11 @@ def config_log(project_name, logfile):
     """
     cwd = os.getcwd()
     if cwd[-len(project_name):] == project_name:
-        tmp_str = 'cat ' + project_name + '.config >> ' + logfile.name 
-        os.system(tmp_str)
-
-    with open(project_name + '.config','r') as config:
-        for line in config:
-            print (line.rstrip())
+       with open(project_name + '.config','r') as config:
+            logfile.write("Contents of config file " + project_name + ".config:\n")
+            for line in config:
+                print (line.rstrip())
+                logfile.write(line)
 
     tmp_str = "------------------------------------------------------------------------------ "
     print (tmp_str)
@@ -121,7 +119,7 @@ def main(args, commline_list):
         :param list commline_list: What was typed at the command line to execute the program
     """
     logfile = open(args.logfile,'a')
-    error_file = open(args.error_file,'a')
+    error_file = open(args.errorfile,'a')
 
     time_start = time.time()
 
@@ -184,7 +182,7 @@ def main(args, commline_list):
     error_file.close()
         
     # check whether error_file contains content
-    chk_rmfile(args.error_file)
+    chk_rmfile(args.errorfile)
     
     return 0    #successful termination of program
     
@@ -251,7 +249,7 @@ if __name__ == "__main__":
                         help='specifies the name of the log-file [default: %(default)s]')
 
     parser.add_argument('--errorfile',
-                        dest='error_file',
+                        dest='errorfile',
                         default=defaults['err'],
                         help='specifies the name of the error-file [default: %(default)s]')
 

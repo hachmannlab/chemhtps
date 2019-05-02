@@ -12,7 +12,7 @@
 # ====================================================
 #SBATCH --constraint=CPU-E5-2630v3
 #SBATCH --tasks-per-node=1
-#SBATCH --mem=64000
+##SBATCH --mem=64000
 
 echo "SLURM job ID         = "$SLURM_JOB_ID
 echo "Working Dir          = "$SLURM_SUBMIT_DIR
@@ -24,7 +24,7 @@ echo "Tasks per Node       = "$SLURM_TASKS_PER_NODE
 echo "Memory per Node      = "$SLURM_MEM_PER_NODE
 
 ulimit -s unlimited
-module load python
+#module load python
 
 
 
