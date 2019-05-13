@@ -1,0 +1,125 @@
+#! /usr/bin/env python
+
+import os
+import sys
+
+import chemhtps
+from chemhtps.engine import main, config_read
+import argparse
+
+## Argument parser desription
+
+usage_str = "usage: %(prog)s [options] arg"
+version_str = "%(prog)s " + chemhtps.__version__
+parser = argparse.ArgumentParser(usage=usage_str)
+
+defaults = {'project_name': None,
+            'setup': False,
+            'generatelib': False,
+            'generatejobs': False,
+            'prioritize': False,
+            'feedjobs': False,
+            'feedjobs_remote': False,
+            'job_sched': 'SLURM',
+            'log': 'ChemHTPS.log',
+            'err': 'ChemHTPS.err',
+            'print': 3}
+
+parser.add_argument('--version',
+                    action='version',
+                    version=version_str)
+
+parser.add_argument('--project_name',
+                    dest='project_name',
+                    default=defaults['project_name'],
+                    help='name of the current project [default: %(default)s]')
+
+parser.add_argument('--setup_project',
+                    dest='setup_project',
+                    action='store_true',
+                    default=defaults['setup'],
+                    help='sets up the infrastructure for a new project [default: %(default)s]')
+
+parser.add_argument('--generatelib',
+                    dest='generatelib',
+                    action='store_true',
+                    default=defaults['generatelib'],
+                    help='generates a new screening library [default: %(default)s]')
+
+parser.add_argument('--generatejobs',
+                    dest='generatejobs',
+                    action='store_true',
+                    default=defaults['generatejobs'],
+                    help='generates computational chemistry jobs [default: %(default)s]')
+
+parser.add_argument('--prioritizepool',
+                    dest='prioritizepool',
+                    action='store_true',
+                    default=defaults['prioritize'],
+                    help='prioritizes the jobs pool [default: %(default)s]')
+
+parser.add_argument('--feedjobs',
+                    dest='feedjobs',
+                    action='store_true',
+                    default=defaults['feedjobs'],
+                    help='Runs the jobs from on the cluster [default: %(default)s]')
+
+parser.add_argument('--feedjobs_remote',
+                    dest='feedjobs_remote',
+                    action='store_true',
+                    default=defaults['feedjobs_remote'],
+                    help='Runs the jobs locally [default: %(default)s]')
+
+# specify log files
+parser.add_argument('--logfile',
+                    dest='logfile',
+                    default=defaults['log'],
+                    help='specifies the name of the log-file [default: %(default)s]')
+
+parser.add_argument('--errorfile',
+                    dest='errorfile',
+                    default=defaults['err'],
+                    help='specifies the name of the error-file [default: %(default)s]')
+
+parser.add_argument('--print_level',
+                    dest='print_level',
+                    default=defaults['print'],
+                    help='specifies the print level for on screen and the logfile [default: %(default)s]')
+
+args = parser.parse_args(sys.argv[1:])
+cwd = os.getcwd()
+dirlist = os.listdir(cwd)
+# reading the config options by calling config_read function and getting the necessary config options
+if args.setup_project == False:
+    for entry in dirlist:
+        if '.config' in entry:
+            config = entry
+            try:
+                config_opts = config_read(config, sys.argv[1:])
+                print (config_opts)
+                no_config = False
+                if 'project_name' in config_opts:
+                    args.project_name = config_opts['project_name']
+                if 'log_file' in config_opts:
+                    args.logfile = config_opts['log_file']
+                if 'error_file' in config_opts:
+                    args.errorfile = config_opts['error_file']
+            except NameError:
+                no_config = True
+else:
+    config_opts = {}
+
+if cwd.rsplit('/')[-1] != args.project_name and args.setup_project == False:
+    msg = "ChemHTPS must be run from inside the project directory, or with the setup_project flag."
+    raise IOError(msg)
+elif args.setup_project == True and args.project_name == None:
+    msg = "Need to give the project_name flag to setup a project."
+    raise IOError(msg)
+elif cwd[-len(args.project_name):] == args.project_name and no_config == True:
+    msg = "There is no config file in the project directory."
+    raise IOError(msg)
+
+main(args, sys.argv,config_opts)  # numbering of sys.argv is only meaningful if it is launched as main
+
+
+
