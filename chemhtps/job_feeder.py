@@ -13,18 +13,9 @@ import time
 import subprocess
 import fnmatch
 
-from misc import (banner,
-                  menu_input,
-                  format_invoked_opts,
-                  tot_exec_time_str,
-                  intermed_exec_timing,
-                  std_datetime_str,
-                  chk_rmfile,
-                  chk_mkdir,
-                  target_dir_struct,
-                  mv2subdir_struct)
+from .utils.misc import banner,tot_exec_time_str,std_datetime_str,chk_rmfile,chk_mkdir
 
-from job_checker import check_jobs, Job
+from .job_checker import check_jobs, Job
 
 ###################################################################################################
 

@@ -8,6 +8,8 @@ _DESCRIPTION = "This module sets up the project, including the file and director
 
 import os
 import fnmatch
+import pkg_resources
+import shutil
 
 ###################################################################################################
 
@@ -23,14 +25,18 @@ def setup_project(project_name):
         os.makedirs(project_name + dir)
 
     # Copy template files into the project directory
-    current_path = os.path.realpath(__file__).rsplit('/', 2)[0]    # this takes the folder path and divides it by the last /, so the first part is the whole thing minus the current chemhtps folder path
-    job_templates = current_path + '/job_templates'
-    tmp_str = 'cp -r ' + job_templates + ' ' + cwd + '/' + project_name
-    os.system(tmp_str)
-    building_blocks = current_path + '/chemlg/chemlg/templates/building_blocks.dat'
-    gener_rules = current_path + '/chemlg/chemlg/templates/config.dat'
-    tmp_str = 'cp ' + building_blocks + ' ' + gener_rules + ' ' + cwd + '/' + project_name + '/screeninglib'
-    os.system(tmp_str)
+    current_path = pkg_resources.resource_filename('chemhtps', os.path.join('metadata'))
+    # current_path = os.path.realpath(__file__).rsplit('/', 2)[0]    # this takes the folder path and divides it by the last /, so the first part is the whole thing minus the current chemhtps folder path
+    job_templates = os.path.join(current_path , 'job_templates')
+    shutil.copytree(job_templates, os.path.join(project_name,'job_templates'))
+
+    # chemlg metadata
+    building_blocks = pkg_resources.resource_filename('chemlg', os.path.join('templates','building_blocks.dat'))
+    gener_rules = pkg_resources.resource_filename('chemlg', os.path.join('templates','config.dat'))
+    shutil.copyfile(building_blocks, os.path.join(project_name,'screeninglib','building_blocks.dat'))
+    shutil.copyfile(gener_rules, os.path.join(project_name,'screeninglib','config.dat'))
+    print('done!')
+
     for root, directories, filenames in os.walk(cwd + '/' + project_name + '/job_templates'):
         for filename in fnmatch.filter(filenames, '*.sh'):
             current_name = os.path.join(root, filename)
