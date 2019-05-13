@@ -1,43 +1,67 @@
-#!/usr/bin/env python
-"""
-Created on 2015-03-05
-@author: j.hachmann
-"""
+import setuptools
+from os import path
+import chemhtps
 
-# TODO: adapt from PyQuante
+here = path.abspath(path.dirname(__file__))
 
-# from setuptools import setup, find_packages
+# Get the long description from the README file
+with open(path.join(here, 'README.md')) as f:
+    long_description = f.read()
 
-# setup(name='CheML',
-#       version='0.0.1',
-#       author='Johannes Hachmann',
-#       author_email='hachmann@buffalo.edu',
-#       url='http://hachmannlab.cbe.buffalo.edu',
-# #       download_url='http://www.my_program.org/files/',
-#       description='CheML - A Machine Learning and Data Mining Program Suite for the Chemical Sciences',
-#       long_description='CheML - A Machine Learning and Data Mining Program Suite for the Chemical Sciences',
-# 
-#       packages = find_packages(),
-#       include_package_data = True,
-#       package_data = {
-#         '': ['*.txt', '*.rst'],
-#         'CheML': ['data/*.html', 'data/*.css'],
-#       },
-#       exclude_package_data = { '': ['README'] },
-#       
-#       scripts = ['bin/cheml'],
-#       
-#       keywords='python tools utils internet www',
-#       license='BSD',
-#       classifiers=['Development Status :: 1 - Development',
-#                    'Natural Language :: English',
-#                    'Operating System :: OS Independent',
-#                    'Programming Language :: Python :: 2',
-#                    'License :: OSI Approved :: BSD License',
-#                    'Topic :: Internet',
-#                    'Topic :: Internet :: WWW/HTTP',
-#                   ],
-#                   
-#       #setup_requires = ['python-stdeb', 'fakeroot', 'python-all'],
-#       install_requires = ['setuptools'],
-#      )
+if __name__ == "__main__":
+    setuptools.setup(
+        name='chemhtps',
+        version=chemhtps.__version__,
+        author='Yudhajit Pal, William Evangelista, Johannes Hachmann',
+        author_email='yudhajit@buffalo.edu, hachmann@buffalo.edu',
+        # url='https://github.com/hachmannlab/chemml',
+        project_urls={
+            'Source': 'https://github.com/hachmannlab/chemhtps',
+            'url': 'https://hachmannlab.github.io/chemhtps/'
+        },
+        description=
+        'A General Purpose Computational Chemistry High-Throughput Screening Platform',
+        long_description=long_description,
+        scripts=['lib/chemhtpsshell'],
+        keywords=[
+            'Data Mining', 'Quantum Chemistry',
+            'Materials Science', 'Drug Discovery'
+        ],
+        license='BSD-3C',
+        packages=setuptools.find_packages(),
+
+        install_requires=[
+            'future', 'six', 'numpy',
+            'chemlg'
+        ],
+        extras_require={
+            'docs': [
+                'sphinx',
+                'sphinxcontrib-napoleon',
+                'sphinx_rtd_theme',
+                'numpydoc',
+                'nbsphinx'
+            ],
+            'tests': [
+                'pytest', #==3.10
+                'pytest-cov',
+                'pytest-pep8',
+                'tox',
+            ],
+        },
+        tests_require=[
+            'pytest',
+            'pytest-cov',
+            'pytest-pep8',
+            'tox',
+        ],
+        classifiers=[
+            'Development Status :: 4 - Beta',
+            'Natural Language :: English',
+            'Intended Audience :: Science/Research',
+            # 'Programming Language :: Python :: 2.7',
+            # 'Programming Language :: Python :: 3.5',
+            'Programming Language :: Python :: 3.6',
+        ],
+        zip_safe=False,
+    )
