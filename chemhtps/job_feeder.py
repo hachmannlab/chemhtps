@@ -13,9 +13,18 @@ import time
 import subprocess
 import fnmatch
 
-from .utils.misc import banner,tot_exec_time_str,std_datetime_str,chk_rmfile,chk_mkdir
+from misc import (banner,
+                  menu_input,
+                  format_invoked_opts,
+                  tot_exec_time_str,
+                  intermed_exec_timing,
+                  std_datetime_str,
+                  chk_rmfile,
+                  chk_mkdir,
+                  target_dir_struct,
+                  mv2subdir_struct)
 
-from .job_checker import check_jobs, Job
+from job_checker import check_jobs, Job
 
 ###################################################################################################
 
@@ -92,6 +101,7 @@ def feed_jobs(project_name, user_name, config_opts):
 
         job_class_list = check_jobs(user_name, scratch_path, result_path, problem_path, job_class_list)
         if jobs_length != len(job_class_list):
+            print ("-------------------------------------------------------------------------------")
             print ("Jobs running at: " + std_datetime_str())
             job_logfile = open('job_tracker.log', 'w')
             jobs_length = len(job_class_list)
@@ -137,7 +147,7 @@ def feed_jobs(project_name, user_name, config_opts):
                     if n_new_jobs > (int(queue[2]) / 2):
                         quickcycle_flag = True
                     if queue[3] == 'long':
-                        job_pool_type_list = ('priority', 'long', 'short')
+                        job_pool_type_list = ( 'long', 'short')
                     elif queue[3] == 'short':
                         job_pool_type_list = ('short',)
                     else:

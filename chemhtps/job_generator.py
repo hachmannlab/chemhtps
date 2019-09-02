@@ -15,7 +15,11 @@ import shutil
 import curses
 import fnmatch
 
-from .utils.misc import banner,tot_exec_time_str,std_datetime_str,chk_rmfile,chk_mkdir
+from misc import (banner,
+                  tot_exec_time_str,
+                  std_datetime_str,
+                  chk_rmfile,
+                  chk_mkdir)
 
 
 ###################################################################################################
@@ -38,7 +42,7 @@ def generate_jobs(project_name, config_opts):
     if os.path.isfile('job_gen.log') :
         with  open('job_gen.log','r') as log_read:
             for line in log_read:
-                if 'configfile with options' in line:
+                if 'config-file with options' in line:
                     jg_no = int((line[:-1].rsplit('.')[-1].rsplit(':')[0]))
 
     jg_no += 1
@@ -154,7 +158,7 @@ def generate_jobs(project_name, config_opts):
     job_gen_lines = []
     input_lines = []
     r_switch = 0
-    logfile.write('configfile with options for job generation with id.no. '+ str(jg_no)  +':\n')
+    logfile.write('config-file with options for job generation with id.no. '+ str(jg_no)  +':\n')
     with open(project_name + '.config', 'r') as config_file:
         config_lines = config_file.readlines()
     
@@ -163,21 +167,24 @@ def generate_jobs(project_name, config_opts):
         if r_switch == 1: job_gen_lines.append(line)
         if 'generatejobs' in line: r_switch = 1
 
-    job_gen_lines.append('\nInput file contents from ' + config_opts['template'] + '\n')
+    job_gen_lines.append('\nInput file contents from ' + config_opts['template'] + ':\n')
+    tmp_str = "---------------------------------------------------------------------\n"
+    job_gen_lines.append(tmp_str)
  
     with open(config_opts['template'], 'r') as input_file:
         input_lines = input_file.readlines()
     
     for line in input_lines:
         job_gen_lines.append(line)
+
+    tmp_str = "---------------------------------------------------------------------\n\n"
     
     logfile.writelines(job_gen_lines)
     for line in job_gen_lines:
         print (line[:-1])
 
-    tmp_str = "---------------------------------------------------------------------\n"
     logfile.write(tmp_str)
-
+    print (tmp_str[:-1])
     
     lib = os.listdir(library)
 
@@ -230,14 +237,14 @@ def generate_jobs(project_name, config_opts):
                     tmp.writelines(temp)
 
     # end of run section
-    tmp_str = "------------------------------------------------------------------------------ "
-    print (tmp_str)
-    logfile.write(tmp_str + '\n')
 
     print ("job_generator module completed....")
     tmp_str = tot_exec_time_str(time_start) + '\n' + std_datetime_str()
-    print (tmp_str + '\n\n\n')
-    logfile.write(tmp_str + '\n\n\n')
+    print (tmp_str)
+    logfile.write(tmp_str + '\n')
+    tmp_str = "------------------------------------------------------------------------------\n "
+    print (tmp_str)
+    logfile.write(tmp_str + '\n')
     error_file.close()
     logfile.close()
     return 0

@@ -12,7 +12,7 @@ import glob
 import subprocess
 import fnmatch
 import datetime
-from .utils.misc import chk_mkdir
+from misc import chk_mkdir
 
 
 class Job(object):
@@ -244,19 +244,19 @@ def check_jobs(user_name, scratch, archive, lost, job_list):
                 job.rm_job()
                 now = datetime.datetime.now()
                 logfile.write('Job ' + job.name + ' has not finished due to a problem in parallel communication, moved to lost+found: ' + str(now) + '\n')
-            elif job.slurm_last_line == "slurmstepd: Exceeded step memory limit at some point." and job.name.split('.')[0] == 'ORCA': #memory limit failure
-                restarts = cwd + '/jobpool/priority/restarts'
-                chk_mkdir(restarts)
-                job.move_job(restarts)
-                now = datetime.datetime.now()
-                logfile.write('Job ' + job.name + ' crashed due to a memory issue, and has been restarted: ' + str(now) + '\n')
-            elif "DUE TO TIME LIMIT" in job.slurm_last_line and job.name.split('.')[0] == 'ORCA': #time limit failure
-                job.time_limit_restart()
-                restarts = cwd + '/jobpool/priority/' 
-                chk_mkdir(restarts)
-                job.move_job(restarts)
-                now = datetime.datetime.now()
-                logfile.write('Job ' + job.name + ' ran out of time and has been restarted: ' + str(now) + '\n')
+            #elif job.slurm_last_line == "slurmstepd: Exceeded step memory limit at some point." and job.name.split('.')[0] == 'ORCA': #memory limit failure
+            #    restarts = cwd + '/jobpool/priority/restarts'
+            #    chk_mkdir(restarts)
+            #    job.move_job(restarts)
+            #    now = datetime.datetime.now()
+            #    logfile.write('Job ' + job.name + ' crashed due to a memory issue, and has been restarted: ' + str(now) + '\n')
+            #elif "DUE TO TIME LIMIT" in job.slurm_last_line and job.name.split('.')[0] == 'ORCA': #time limit failure
+            #    job.time_limit_restart()
+            #    restarts = cwd + '/jobpool/priority/' 
+            #    chk_mkdir(restarts)
+            #    job.move_job(restarts)
+            #    now = datetime.datetime.now()
+            #    logfile.write('Job ' + job.name + ' ran out of time and has been restarted: ' + str(now) + '\n')
             else:
                 job.tar_job_unit('.bad.tbz')
                 job.move_job(lost)

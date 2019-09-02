@@ -14,7 +14,11 @@ import math
 import curses
 import fnmatch
 
-from .utils.misc import banner,tot_exec_time_str,std_datetime_str,chk_rmfile,chk_mkdir
+from misc import (banner,
+                  tot_exec_time_str,
+                  std_datetime_str,
+                  chk_rmfile,
+                  chk_mkdir)
 
 
 def generate_structurelib():
@@ -143,7 +147,7 @@ def generate_geometries(project_name,config_opts):
     config_lines = []
     lib_gen_lines = []
     r_switch = 0
-    logfile.write('configfile with options for library generation\n')
+    logfile.write('config-file with options for library generation:\n')
     with open(project_name + '.config', 'r') as config_file:
         config_lines = config_file.readlines()
     
@@ -198,14 +202,17 @@ def generate_geometries(project_name,config_opts):
         os.system(submit)
         os.remove("libtmp.sh")
     # end of run section
-    tmp_str = "------------------------------------------------------------------------------ "
+    tmp_str = "---------------------------------------------------------------------"
     print (tmp_str)
     logfile.write(tmp_str + '\n')
 
     print ("library_generator module completed....")
     tmp_str = tot_exec_time_str(time_start) + '\n' + std_datetime_str()
-    print (tmp_str + '\n\n\n')
-    logfile.write(tmp_str + '\n\n\n')
+    print (tmp_str + '\n')
+    logfile.write(tmp_str + '\n\n')
+    tmp_str = "------------------------------------------------------------------------------ "
+    print (tmp_str)
+    logfile.write(tmp_str + '\n')
     error_file.close()
     logfile.close()
     return 0

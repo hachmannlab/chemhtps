@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#SBATCH --clusters=chemistry
+#SBATCH --clusters=faculty
 #SBATCH --partition=beta --qos=beta
 #SBATCH --account=hachmann
 #SBATCH --time=100:00:00
@@ -10,8 +10,8 @@
 # For 16-core nodes
 # ====================================================
 #SBATCH --constraint=CPU-E5-2650v4
-#SBATCH --tasks-per-node=1
-##SBATCH --mem=64000
+#SBATCH --tasks-per-node=24
+#SBATCH --mem=64000
 
 cur_dir=$(pwd)
 #export INFILE=inp_ut.inp 
