@@ -13,7 +13,7 @@ import time
 import subprocess
 import fnmatch
 
-from misc import (banner,
+from .utils.misc import (banner,
                   menu_input,
                   format_invoked_opts,
                   tot_exec_time_str,
@@ -24,7 +24,7 @@ from misc import (banner,
                   target_dir_struct,
                   mv2subdir_struct)
 
-from job_checker import check_jobs, Job
+from .job_checker import check_jobs, Job
 
 ###################################################################################################
 

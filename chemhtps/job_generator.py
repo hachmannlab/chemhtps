@@ -15,7 +15,7 @@ import shutil
 import curses
 import fnmatch
 
-from misc import (banner,
+from .utils.misc import (banner,
                   tot_exec_time_str,
                   std_datetime_str,
                   chk_rmfile,

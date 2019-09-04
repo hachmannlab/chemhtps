@@ -15,17 +15,17 @@ def setup_project(project_name):
     """
         This function sets up the project, including the file and directory structure.
     """
-    dir_list = ['/archive', '/db', '/jobpool/short', '/jobpool/priority', '/jobpool/long', '/lost+found', '/screeninglib']
+    dir_list = ['/archive', '/db', '/jobpool/short', '/jobpool/long', '/lost+found', '/screeninglib']
     cwd = os.getcwd()  # just in case we need this
     user = os.getlogin()
 
-    for dir in dir_list:
-        os.makedirs(project_name + dir)
+    for dirs in dir_list:
+        os.makedirs(project_name + dirs)
 
     # Copy template files into the project directory
     current_path = os.path.realpath(__file__).rsplit('/', 2)[0]    # this takes the folder path and divides it by the last /, so the first part is the whole thing minus the current chemhtps folder path
-    job_templates = current_path + '/job_templates'
-    tmp_str = 'cp -r ' + job_templates + ' ' + cwd + '/' + project_name
+    job_templates = current_path + '/chemhtps/metadata/job_templates'
+    tmp_str = 'cp -r ' + job_templates + ' ' + cwd + '/' + project_name + '/'
     os.system(tmp_str)
     building_blocks = current_path + '/chemlg/chemlg/templates/building_blocks.dat'
     gener_rules = current_path + '/chemlg/chemlg/templates/config.dat'

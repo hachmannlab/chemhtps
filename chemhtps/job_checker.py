@@ -12,7 +12,7 @@ import glob
 import subprocess
 import fnmatch
 import datetime
-from misc import chk_mkdir
+from .utils.misc import chk_mkdir
 
 
 class Job(object):

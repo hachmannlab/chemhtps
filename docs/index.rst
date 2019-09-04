@@ -1,17 +1,15 @@
-.. ChemHTPS documentation master file, created by
-   sphinx-quickstart on Tue Jun 14 15:02:21 2016.
+.. chemhtps documentation master file, created by
+   sphinx-quickstart on Tue Sep  3 17:23:46 2019.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to ChemHTPS's documentation!
+Welcome to chemhtps's documentation!
 ====================================
-
-Contents:
 
 .. toctree::
    :maxdepth: 2
+   :caption: Contents:
 
-   modules
 
 
 Indices and tables
@@ -20,4 +18,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-

@@ -30,8 +30,9 @@ DESCRIPTION = "ChemHTPS is a virtual high-throughput screening program suite for
 import sys
 import os
 import time
+import argparse
 
-from .utils.misc import banner,format_invoked_opts,tot_exec_time_str,std_datetime_str,chk_rmfile
+from .utils.misc import banner,format_invoked_opts,tot_exec_time_str,std_datetime_str,chk_rmfile,chk_mkdir
 
 from .project_setup import setup_project
 from .library_generator import (generate_structurelib,
@@ -172,4 +173,4 @@ def main(args, commline_list, config_opts={}):
     return 0    #successful termination of program
 
 
-
+##################################################################################################
