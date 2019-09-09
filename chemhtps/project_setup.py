@@ -27,10 +27,10 @@ def setup_project(project_name):
     job_templates = current_path + '/chemhtps/metadata/job_templates'
     tmp_str = 'cp -r ' + job_templates + ' ' + cwd + '/' + project_name + '/'
     os.system(tmp_str)
-    building_blocks = current_path + '/chemlg/chemlg/templates/building_blocks.dat'
-    gener_rules = current_path + '/chemlg/chemlg/templates/config.dat'
-    tmp_str = 'cp ' + building_blocks + ' ' + gener_rules + ' ' + cwd + '/' + project_name + '/screeninglib'
-    os.system(tmp_str)
+    #building_blocks = current_path + '/chemlg/chemlg/templates/building_blocks.dat'
+    #gener_rules = current_path + '/chemlg/chemlg/templates/config.dat'
+    #tmp_str = 'cp ' + building_blocks + ' ' + gener_rules + ' ' + cwd + '/' + project_name + '/screeninglib'
+    #os.system(tmp_str)
     for root, directories, filenames in os.walk(cwd + '/' + project_name + '/job_templates'):
         for filename in fnmatch.filter(filenames, '*.sh'):
             current_name = os.path.join(root, filename)
