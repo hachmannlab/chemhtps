@@ -1,0 +1,25 @@
+project_name = trial_htps
+user_name = yudhajit
+log_file = trial_htps.log
+error_file = trial_htps.err
+
+generatelib
+generation_file = ./screeninglib/config.dat
+building_block = ./screeninglib/trial-smiles.dat
+cores = 1
+clusters = run locally
+
+generatejobs
+library_in = trial_lib_xyz 
+job_type = long
+program = ORCA
+template = ./job_templates/ORCA/test_orca.inp
+
+feedjobs
+feed_local = TRUE
+job_sched = SLURM
+
+postprocess
+
+populatedb
+

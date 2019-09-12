@@ -1,0 +1,6 @@
+#cluster partition limit type
+ub-hpc general-compute 0 long
+ub-hpc debug 0 short
+ub-hpc gpu 0 long
+ub-hpc largemem 0 long
+chemistry beta 10 long

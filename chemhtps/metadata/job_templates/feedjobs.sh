@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#SBATCH --clusters=chemistry
+#SBATCH --clusters=faculty
 #SBATCH --partition=beta --qos=beta
 #SBATCH --account=hachmann 
 ##SBATCH --time=0
@@ -29,6 +29,6 @@ ulimit -s unlimited
 
 
 echo "Launch job"
-srun $SLURM_SUBMIT_DIR/../chemhtps.py --feedjobs_remote
+chemhtpsshell --feedjobs_remote
 #
 echo "All Done!"

@@ -1,0 +1,25 @@
+project_name = trial
+user_name = yudhajit
+log_file = trial.log
+error_file = trial.err
+
+generatelib
+generation_file = ./screeninglib/config.dat
+building_block = ./screeninglib/trial-smiles.dat
+cores = 1
+clusters = run locally
+
+generatejobs
+library_in = none
+job_type = none
+program = none
+template = none
+
+feedjobs
+feed_local = TRUE
+job_sched = SLURM
+
+postprocess
+
+populatedb
+

@@ -227,7 +227,7 @@ def generate_jobs(project_name, config_opts):
                         if count > 0 and count < length:
                             temp.insert(i,mol_section[count])
                             count += 1
-                        if line == 'xyzlinehere\n':
+                        if line == 'xyzfile\n':
                             temp[i] = mol_section[0]
                             count += 1    
                         elif count == 0 and i == len(temp) - 1:

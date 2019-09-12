@@ -1,0 +1,12 @@
+! UKS PBE0 Def2-SVPD D3 opt
+% geom MaxIter 1000 end 
+% scf MaxIter 1000 end 
+% base "optb" 
+*xyzfile 0 1
+
+$ new_job
+! UKS PBE0 Def2-SVPD D3 CPCM(CH2Cl2) NBO
+% scf MaxIter 1000 end 
+% base "SPb" 
+*xyzfile 0 1 optb.xyz
+
