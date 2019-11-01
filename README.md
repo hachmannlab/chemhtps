@@ -68,15 +68,19 @@ Please cite the use of ChemHTPS as:
 ## About us:
 
 Maintainers:
+
     - Johannes Hachmann, hachmann@buffalo.edu
     - Yudhajit Pal
       University at Buffalo - The State University of New York (UB)
 
+
 Contributors:
+
     - William Evangelista (UB): base-code and starting conceptualization
     - Mojtaba Haghighatlari (UB): scientific advice and software mentor
     - Gaurav Vishwakarma (UB): library generator module
     - Mohammad Atif Faiz Afzal (UB): library generator module
+
 
 We encourage any contributions and feedback. Feel free to fork and make pull-request to the "development" branch.
 
