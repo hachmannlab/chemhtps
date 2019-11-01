@@ -3,7 +3,7 @@ Welcome to ChemHTPS's documentation!
 
 ChemHTPS is a program suite to for conducting high-throughput computational screenings and generating chemical-modeling data.
 
-    - source repository on github: (https://github.com/hachmannlab/chemhtps)
+source repository on github: (https://github.com/hachmannlab/chemhtps)
 
 Program Version: 0.1
 
