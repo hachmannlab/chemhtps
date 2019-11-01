@@ -1,8 +1,3 @@
-.. chemhtps documentation master file, created by
-   sphinx-quickstart on Tue Sep  3 17:23:46 2019.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Welcome to ChemHTPS's documentation!
 ====================================
 
@@ -19,6 +14,10 @@ The code structure is modular and has an object-oriented design to make it flexi
 
 We recommend running ChemHTPS with ChemLG for in-silico molecule generation. For this, OpenBabel and its Python extension, Pybel is required.
 Additional ChemLG requirements include MPI4PY for its parallel implementation. Hence OpenBabel and MPI4PY are also, by extension, dependencies of ChemHTPS.
+
+Documentation:
+++++++++++++++
+ChemHTPS documentation can be found here https://chemhtps.readthedocs.io/en/latest/
 
 Installation and Dependencies:
 ++++++++++++++++++++++++++++++
