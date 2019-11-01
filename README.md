@@ -7,23 +7,18 @@ ChemHTPS is a program suite to for conducting high-throughput computational scre
 
 Program Version: 0.1
 
-Code Design:
-++++++++++++
+## Code Design:
 ChemHTPS is developed in the Python 3 programming language and makes use of a host of domain-specific libraries.
 The code structure is modular and has an object-oriented design to make it flexible and versatile for diverse project-specific needs.
 
 We recommend running ChemHTPS with ChemLG for in-silico molecule generation. For this, OpenBabel and its Python extension, Pybel is required.
 Additional ChemLG requirements include MPI4PY for its parallel implementation. Hence OpenBabel and MPI4PY are also, by extension, dependencies of ChemHTPS.
 
-Documentation:
-++++++++++++++
+## Documentation:
 ChemHTPS documentation can be found here https://chemhtps.readthedocs.io/en/latest/
 
-Installation and Dependencies:
-++++++++++++++++++++++++++++++
+## Installation and Dependencies:
 You can download ChemHTPS from Python Package Index (PyPI) via pip. We also recommend that a virtual environment is used to run ChemHTPS to allow it to interface with ChemLG.
-
-.. code:: bash
 
     conda create --name my_chemeco_env python=3.6
     source activate my_chemeco_env
@@ -35,24 +30,12 @@ You can download ChemHTPS from Python Package Index (PyPI) via pip. We also reco
 
 You can test the installation with:
 
-.. code:: bash
-
     pytest -v
 
 
-
-.. toctree::
-   :maxdepth: 4
-   :caption: ChemHTPS Guide
-
-   chemhtps
-
-
-Citation:
-+++++++++
+## Citation:
 Please cite the use of ChemHTPS as:
 
-::
 
     Main citation:
 
@@ -82,8 +65,7 @@ Please cite the use of ChemHTPS as:
 
 
 
-About us:
-+++++++++
+## About us:
 
 :Maintainers:
     - Johannes Hachmann, hachmann@buffalo.edu
@@ -99,27 +81,11 @@ About us:
 We encourage any contributions and feedback. Feel free to fork and make pull-request to the "development" branch.
 
 
-Acknowledgements:
-+++++++++++++++++
+## Acknowledgements:
     - ChemHTPS is based upon work supported by the U.S. National Science Foundation under grant #OAC-1751161.
     - ChemHTPS was also supported by start-up funds provided by UB's School of Engineering and Applied Science and UB's Department of Chemical and Biological Engineering, the New York State Center of Excellence in Materials Informatics through seed grant #1140384-8-75163, and the U.S. Department of Energy under grant #DE-SC0017193.
 
 
-License:
-++++++++
+## License:
 ChemHTPS is copyright (C) 2014-2019 Johannes Hachmann and Yudhajit Pal, all rights reserved.
 ChemHTPS is distributed under 3-Clause BSD License (https://opensource.org/licenses/BSD-3-Clause).
-
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
