@@ -3,7 +3,7 @@ Welcome to ChemHTPS's documentation!
 
 ChemHTPS is a program suite to for conducting high-throughput computational screenings and generating chemical-modeling data.
 
-    - source repository on github: https://github.com/hachmannlab/chemhtps
+    - source repository on github: (https://github.com/hachmannlab/chemhtps)
 
 Program Version: 0.1
 
@@ -15,7 +15,7 @@ We recommend running ChemHTPS with ChemLG for in-silico molecule generation. For
 Additional ChemLG requirements include MPI4PY for its parallel implementation. Hence OpenBabel and MPI4PY are also, by extension, dependencies of ChemHTPS.
 
 ## Documentation:
-ChemHTPS documentation can be found here https://chemhtps.readthedocs.io/en/latest/
+ChemHTPS documentation can be found here (https://chemhtps.readthedocs.io/en/latest/)
 
 ## Installation and Dependencies:
 You can download ChemHTPS from Python Package Index (PyPI) via pip. We also recommend that a virtual environment is used to run ChemHTPS to allow it to interface with ChemLG.
@@ -67,12 +67,12 @@ Please cite the use of ChemHTPS as:
 
 ## About us:
 
-:Maintainers:
+Maintainers:
     - Johannes Hachmann, hachmann@buffalo.edu
     - Yudhajit Pal
       University at Buffalo - The State University of New York (UB)
 
-:Contributors:
+Contributors:
     - William Evangelista (UB): base-code and starting conceptualization
     - Mojtaba Haghighatlari (UB): scientific advice and software mentor
     - Gaurav Vishwakarma (UB): library generator module
