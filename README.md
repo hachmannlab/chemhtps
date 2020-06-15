@@ -20,8 +20,6 @@ Additional ChemLG requirements include MPI4PY for its parallel implementation. H
 ## Installation and Dependencies:
 We recommend that a virtual environment is used to run ChemHTPS to allow it to interface with ChemLG.
 
-.. code:: bash
-
     conda create --name my_chemeco_env python=3.6
     source activate my_chemeco_env
     conda install -c openbabel openbabel
@@ -30,28 +28,20 @@ We recommend that a virtual environment is used to run ChemHTPS to allow it to i
 
 Following this, you can git-clone from the chemhtps github repository
 
-.. code:: bash
-
     git clone https://github.com/hachmannlab/chemhtps
     cd chemhtps
     pip install -e .
 
 optional: 
 
-.. code:: bash
-
     pip install chemlg 
 
 NOTE: In the future, you can download ChemHTPS from Python Package Index (PyPI) via pip and the installation can be done through simply:
-
-.. code:: bash
 
     pip install chemhtps
 
    
 You can test the installation with:
-
-.. code:: bash
 
     pytest -v
 
