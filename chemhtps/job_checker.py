@@ -223,6 +223,12 @@ def check_jobs(user_name, scratch, archive, lost, job_list):
                 job.rm_job()
                 now = datetime.datetime.now()
                 logfile.write('Job ' + job.name + ' has not finished due to a mismatch between charge and spin multiplicity, moved to lost+found: ' + str(now) + '\n')
+            elif job.slurm_last_line == "All Done!" and "You must have a [COORDS] ... [END] block in your input" in job.out_2last_line: # orca missing mol failure
+                job.tar_job_unit('.missingmolsec.tbz')
+                job.move_job(lost)
+                job.rm_job()
+                now = datetime.datetime.now()
+                logfile.write('Job ' + job.name + ' has not finished due to a missing molecule section in the geometry, moved to lost+found: ' + str(now) + '\n')
             elif job.slurm_last_line == "All Done!" and job.out_last_line == "No atoms to convert in Cartesian2Internal": #orca geometry failure
                 job.tar_job_unit('.missingcoord.tbz')
                 job.move_job(lost)
@@ -230,7 +236,7 @@ def check_jobs(user_name, scratch, archive, lost, job_list):
                 now = datetime.datetime.now()
                 logfile.write('Job ' + job.name + ' has not finished due to a missing coordinate in the geometry, moved to lost+found: ' + str(now) + '\n')
             elif job.slurm_last_line == "All Done!" and "interrupt SIGx" in job.out_last_line:
-                if "Could not find $molecule section" in job.out_3last_line: #qchem geometry failure
+                if "Could not find $molecule section" in job.out_3last_line: #qchem missing mol failure
                     job.tar_job_unit('.missingmolsec.tbz')
                     job.move_job(lost)
                     job.rm_job()
