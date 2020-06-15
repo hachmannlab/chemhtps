@@ -45,6 +45,8 @@ class Job(object):
         self.rm_path = ''
         self.slurm_last_line = ''
         self.out_last_line = ''
+        self.out_2last_line = ''
+        self.slurm_3last_line = ''
         self.out_3last_line = ''
 
     def slurm_submit_id(self,sbatch):
@@ -109,12 +111,25 @@ class Job(object):
         #print (self.slurm_id)
         self.slurm_last_line = self.nth_line(1, 'slurm.out')
          
+    def slurm_3last(self):
+        """
+            Get the last line of the slurm output
+        """
+        #print (self.slurm_id)
+        self.slurm_3last_line = self.nth_line(3, 'slurm.out')
+         
     def out_last(self):
         """
             Get the last line of the quantum software output
         """
         self.out_last_line = self.nth_line(1, self.name + ".out")
     
+    def out_2last(self):
+        """
+            Get the last line of the quantum software output
+        """
+        self.out_2last_line = self.nth_line(2, self.name + ".out")
+
     def out_3last(self):
         """
             Get the third from last line of the quantum software output
@@ -180,7 +195,9 @@ def check_jobs(user_name, scratch, archive, lost, job_list):
                 rem_list.append(job)
                 continue
             job.slurm_last()
+            job.slurm_3last()
             job.out_last()
+            job.out_2last()
             job.out_3last()
             if job.slurm_last_line == "All Done!" and "TOTAL RUN TIME:" in job.out_last_line: #orca success
                 job.tar_job_unit()
@@ -200,6 +217,12 @@ def check_jobs(user_name, scratch, archive, lost, job_list):
                 job.rm_job()
                 now = datetime.datetime.now()
                 logfile.write('Job ' + job.name + ' has not finished due to the geometry being very off, moved to lost+found: ' + str(now) + '\n')
+            elif job.slurm_last_line == "All Done!" and "Error : multiplicity" in job.out_2last_line: #orca multiplicity failure 
+                job.tar_job_unit('.spinchargeerr.tbz')
+                job.move_job(lost)
+                job.rm_job()
+                now = datetime.datetime.now()
+                logfile.write('Job ' + job.name + ' has not finished due to a mismatch between charge and spin multiplicity, moved to lost+found: ' + str(now) + '\n')
             elif job.slurm_last_line == "All Done!" and job.out_last_line == "No atoms to convert in Cartesian2Internal": #orca geometry failure
                 job.tar_job_unit('.missingcoord.tbz')
                 job.move_job(lost)
