@@ -64,6 +64,6 @@ def setup_project(project_name):
     # creates a new queue_list file for the project with blank/default values for the maximum loads on the various queues
     with open(project_name + '/queue_list.dat', 'w') as queue_list:
         lines = ['#cluster partition limit type\n', 'ub-hpc general-compute 0 long\n', 'ub-hpc debug 3 short\n',
-                 'ub-hpc gpu 0 long\n', 'ub-hpc largemem 0 long\n', 'chemistry beta 0 long\n']
+                 'ub-hpc gpu 0 long\n', 'ub-hpc largemem 0 long\n', 'faculty beta 0 long\n']
         queue_list.writelines(lines)
         queue_list.close()
