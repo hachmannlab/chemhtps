@@ -1,1 +1,2 @@
 !DFT PBE0 Def2-SVP smallPRINT PRINTBASIS PRINTGAP opt
+xyzfile 0 1
