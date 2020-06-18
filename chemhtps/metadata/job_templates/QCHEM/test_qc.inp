@@ -11,6 +11,6 @@ $end
 
 $molecule
 0 1
-xyzlinehere
+xyzfile
 $end
 
