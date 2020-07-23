@@ -3,6 +3,12 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+[![Build Status](https://travis-ci.org/hachmannlab/chemhtps.svg?branch=master)](https://travis-ci.org/hachmannlab/chemhtps)
+[![codecov](https://codecov.io/gh/hachmannlab/chemhtps/branch/master/graph/badge.svg)](https://codecov.io/gh/hachmannlab/chemhtps)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/hachmannlab/chemhtps.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/hachmannlab/chemhtps/context:python)
+[![version status](http://img.shields.io/pypi/v/chemhtps.svg?style=flat)](https://pypi.python.org/pypi/chemhtps)
+[![license](http://img.shields.io/badge/license-BSD-blue.svg?style=flat)](https://github.com/hachmannlab/chemhtps/blob/master/LICENSE)
+
 Welcome to ChemHTPS's documentation!
 ====================================
 
