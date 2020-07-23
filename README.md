@@ -11,7 +11,7 @@ ChemHTPS is a program suite to for conducting high-throughput computational scre
 
 [source repository on github](https://github.com/hachmannlab/chemhtps)
 
-<p align="left">
+<p align="center">
   <img align="middle" src="./docs/images/Chemhtps_logo.png" alt="ChemHTPS" width="400px" class="center">
  </p>
 
