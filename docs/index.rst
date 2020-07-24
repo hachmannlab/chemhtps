@@ -3,6 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+|logo|
 
 Welcome to ChemHTPS's documentation!
 ====================================
@@ -10,11 +11,6 @@ Welcome to ChemHTPS's documentation!
 ChemHTPS is a program suite to for conducting high-throughput computational screenings and generating chemical-modeling data.
 
     - source repository on github: https://github.com/hachmannlab/chemhtps
-
-
-<p align="center">
-  <img align="middle" src="./docs/images/Chemhtps_logo.png" alt="ChemHTPS" width="400px" class="center">
-</p>
 
 
 
@@ -151,3 +147,7 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+.. |logo| image:: images/Chemhtps_logo.png
+   :width: 540 px
+   :target: https://chemhtps.readthedocs.io/en/latest/
