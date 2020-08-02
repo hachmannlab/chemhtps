@@ -148,6 +148,6 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
-.. |logo| image:: images/chtps_logo.png
+.. |logo| image:: images/Chemhtps_logo.png
    :width: 540 px
    :target: https://chemhtps.readthedocs.io/en/latest/
